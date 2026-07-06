@@ -959,4 +959,83 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
         전송: 5,000자 / 요청 &nbsp;·&nbsp; 첨부: .txt .md .docx · CSO 3등급↓ · DRM 3등급↓<br>
         검사: 정규식 v2.1 + 개인정보 AI v1.3 + CSO등급 v1.0<br>
         후처리: <span style="color:var(--warn)">경고</span> &nbsp;·&nbsp; 예외 신청 허용
-   
+      </div>
+      <div class="actions"><button class="btn ghost" onclick="ppgo(1)">← 이전</button><button class="btn" onclick="closePP()">정책 저장 · 배포</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function go(p){
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.p===p&&a.dataset.i===undefined));
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
+}
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+a.dataset.p));
+  document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('on'));a.classList.add('on');
+  if(a.dataset.i!==undefined){const k=a.dataset.t;document.querySelectorAll('[id^="'+k+'-"]').forEach(c=>c.classList.toggle('on',c.id===k+'-'+a.dataset.i));}
+}));
+/* sidebar collapsible product groups */
+document.querySelectorAll('.nav a.grp').forEach(a=>{
+  const g=document.getElementById('g-'+a.dataset.g);
+  a.querySelector('.caret').addEventListener('click',e=>{
+    e.stopPropagation();
+    a.classList.toggle('closed');g.classList.toggle('closed');
+  });
+  a.addEventListener('click',()=>{a.classList.remove('closed');g.classList.remove('closed');});
+});
+document.querySelectorAll('.tabs').forEach(t=>{
+  const key=t.dataset.t;
+  t.querySelectorAll('span').forEach((s,i)=>s.addEventListener('click',()=>{
+    t.querySelectorAll('span').forEach(x=>x.classList.remove('on'));s.classList.add('on');
+    document.querySelectorAll('[id^="'+key+'-"]').forEach(c=>c.classList.toggle('on',c.id===key+'-'+i));
+  }));
+});
+document.querySelectorAll('.toggle').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('on')));
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('sel')));
+document.querySelectorAll('.ck').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('sel');c.querySelector('i').textContent=c.classList.contains('sel')?'✓':'';}));
+document.querySelectorAll('.radio').forEach(r=>r.addEventListener('click',()=>{
+  r.parentNode.querySelectorAll('.radio').forEach(x=>{x.classList.remove('sel');x.querySelector('input').checked=false;});
+  r.classList.add('sel');r.querySelector('input').checked=true;
+}));
+/* report wizard */
+function openReport(){document.getElementById('reportModal').classList.add('on');wgo(0);}
+function closeReport(){document.getElementById('reportModal').classList.remove('on');}
+function wgo(n){
+  document.querySelectorAll('#wiz span').forEach((s,i)=>s.classList.toggle('on',i===n));
+  document.querySelectorAll('.wstep').forEach((w,i)=>w.classList.toggle('on',i===n));
+}
+document.querySelectorAll('#wiz span').forEach((s,i)=>s.addEventListener('click',()=>wgo(i)));
+document.getElementById('reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')closeReport();});
+/* AI Monitor collect-policy modal */
+function openNDR(){document.getElementById('ndrModal').classList.add('on');}
+function closeNDR(){document.getElementById('ndrModal').classList.remove('on');}
+document.getElementById('ndrModal').addEventListener('click',e=>{if(e.target.id==='ndrModal')closeNDR();});
+/* PC Proxy policy wizard */
+function openPP(){document.getElementById('ppModal').classList.add('on');ppgo(0);}
+function closePP(){document.getElementById('ppModal').classList.remove('on');}
+function ppgo(n){
+  document.querySelectorAll('#ppwiz span').forEach((s,i)=>s.classList.toggle('on',i===n));
+  document.querySelectorAll('.ppstep').forEach((w,i)=>w.classList.toggle('on',i===n));
+}
+document.querySelectorAll('#ppwiz span').forEach((s,i)=>s.addEventListener('click',()=>ppgo(i)));
+document.getElementById('ppModal').addEventListener('click',e=>{if(e.target.id==='ppModal')closePP();});
+/* LLM Proxy service-add modal */
+function openLPSvc(){document.getElementById('lpSvcModal').classList.add('on');}
+function closeLPSvc(){document.getElementById('lpSvcModal').classList.remove('on');}
+function saveLPSvc(){
+  const name=document.getElementById('lpSvcName').value||'신규 서비스';
+  const group=document.getElementById('lpSvcGroup').value;
+  const models=[...document.querySelectorAll('#lpSvcModels .chip.sel')].map(c=>c.textContent).join(' · ')||'-';
+  const rpm=document.getElementById('lpSvcRpm').value, tpm=Number(document.getElementById('lpSvcTpm').value).toLocaleString();
+  const budget=document.getElementById('lpSvcBudget').value;
+  const rules=[...document.querySelectorAll('#lpSvcRules .ck.sel')].map(c=>c.textContent.replace('✓','').trim()).join(' + ')||'-';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${name}</td><td>${group}</td><td>${models}</td><td>${rpm} / ${tpm}</td><td>${budget}</td><td>${rules}</td><td><span class="pill p-warn">배포 대기</span></td>`;
+  document.getElementById('lpSvcTable').appendChild(tr);
+  closeLPSvc();
+}
+document.getElementById('lpSvcModal').addEventListener('click',e=>{if(e.target.id==='lpSvcModal')closeLPSvc();});
+</script>
+</body>
+</html>
