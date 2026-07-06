@@ -447,10 +447,27 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
     <!-- ============ Security Manager ============ -->
     <section class="page" id="p-sm">
       <h2>Security Manager <span class="pill p-info">플랫폼 공통 — 검사 규정 허브</span></h2>
-      <div class="sub">검사 규정을 방식별로 정의하고 전 채널(AI Monitor · PC Proxy · Remote Web Proxy · LLM Proxy)에 공통 배포 — 가드레일 다중화</div>
-      <div class="tabs" data-t="sm"><span class="on">정규식 검사</span><span>개인정보 AI 검사</span><span>대외비 AI 검사</span><span>CSO등급 검사</span><span>LLM결과 검사</span><span>이상행위 검사</span></div>
+      <div class="sub">AI 서비스 카탈로그와 검사 규정을 정의하고 전 채널(AI Monitor · PC Proxy · Remote Web Proxy · LLM Proxy)에 공통 배포 — 가드레일 다중화</div>
+      <div class="tabs" data-t="sm"><span class="on">AI 서비스 관리</span><span>정규식 검사</span><span>개인정보 AI 검사</span><span>대외비 AI 검사</span><span>CSO등급 검사</span><span>LLM결과 검사</span><span>이상행위 검사</span></div>
 
       <div class="tabc on" id="sm-0">
+        <div class="card">
+          <h3>AI 서비스 관리 <span class="ref">플랫폼 공통 카탈로그 — 등록·적용된 서비스만 제품 정책에서 통제 가능</span></h3>
+          <table id="aiSvcTable">
+            <tr><th>AI 서비스</th><th>식별자 (URL · 프로세스명)</th><th>출처</th><th>정책적용 제품</th><th>상태</th></tr>
+            <tr><td>ChatGPT</td><td><code>chatgpt.com · api.openai.com</code> · <code>ChatGPT.exe</code></td><td>기본 카탈로그</td><td><span class="pill p-info">AI 모니터</span> <span class="pill p-info">PC Proxy</span> <span class="pill p-info">Remote Web Proxy</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>Claude</td><td><code>claude.ai · api.anthropic.com</code> · <code>Claude.exe</code></td><td>기본 카탈로그</td><td><span class="pill p-info">AI 모니터</span> <span class="pill p-info">PC Proxy</span> <span class="pill p-info">Remote Web Proxy</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>Gemini</td><td><code>gemini.google.com · generativelanguage.googleapis.com</code></td><td>기본 카탈로그</td><td><span class="pill p-info">AI 모니터</span> <span class="pill p-info">Remote Web Proxy</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>Office Copilot</td><td><code>copilot.microsoft.com</code> · <code>Copilot 프로세스군</code></td><td>기본 카탈로그</td><td><span class="pill p-info">AI 모니터</span> <span class="pill p-info">PC Proxy</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>DeepSeek</td><td><code>chat.deepseek.com · api.deepseek.com</code></td><td>사용자 등록</td><td><span class="pill p-info">AI 모니터</span></td><td><span class="pill p-warn">배포 대기</span></td></tr>
+            <tr><td>사내 Ollama</td><td><code>ollama.exe</code> · <code>localhost:11434</code></td><td>사용자 등록</td><td><span class="pill p-info">PC Proxy</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+          </table>
+          <div class="actions"><button class="btn ghost" onclick="openAISvc()">+ AI 서비스 등록</button><button class="btn">선택 서비스 배포</button></div>
+          <div class="note">제품 정책(AI 모니터 · PC Proxy · Remote Web Proxy)에서는 여기서 해당 제품에 적용된 AI 서비스만 통제할 수 있습니다. 미등록 AI 트래픽은 AI 모니터 Shadow AI 탐지로 식별 후 등록을 권장합니다.</div>
+        </div>
+      </div>
+
+      <div class="tabc" id="sm-1">
         <div class="card">
           <h3>정규식 검사 규정 <span class="ref">패턴 일치 — 저지연 · 전 채널 1차 필터</span></h3>
           <table>
@@ -465,7 +482,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
         </div>
       </div>
 
-      <div class="tabc" id="sm-1">
+      <div class="tabc" id="sm-2">
         <div class="card">
           <h3>개인정보 AI 검사 규정 <span class="ref">AI 문맥 분석 — 패턴 없는 개인정보 탐지</span></h3>
           <table>
@@ -480,7 +497,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
         </div>
       </div>
 
-      <div class="tabc" id="sm-2">
+      <div class="tabc" id="sm-3">
         <div class="card">
           <h3>대외비 AI 검사 규정 <span class="ref">AI 판정 — 대외비·기밀 문맥 탐지</span></h3>
           <table>
@@ -494,7 +511,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
         </div>
       </div>
 
-      <div class="tabc" id="sm-3">
+      <div class="tabc" id="sm-4">
         <div class="card">
           <h3>CSO등급 검사 규정 <span class="ref">문서 보안등급(CSO 등급) 기반 통제</span></h3>
           <table>
@@ -509,7 +526,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
         </div>
       </div>
 
-      <div class="tabc" id="sm-4">
+      <div class="tabc" id="sm-5">
         <div class="card">
           <h3>LLM결과 검사 규정 <span class="ref">LLM 응답(결과) 검사 — 응답 경유 유출 통제</span></h3>
           <table>
@@ -524,7 +541,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
         </div>
       </div>
 
-      <div class="tabc" id="sm-5">
+      <div class="tabc" id="sm-6">
         <div class="card">
           <h3>이상행위 검사 규정 <span class="ref">사용 행위 패턴 분석 — 위험 점수 산출</span></h3>
           <table>
@@ -548,7 +565,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
       <div class="tabc on" id="ndr-0">
         <div class="card">
           <h3>기 설정 정책 — 프롬프트 수집</h3>
-          <table>
+          <table id="ndrSvcTable">
             <tr><th>대상 서비스</th><th>수집 범위</th><th>검사 규정 (SM 연동)</th><th>수집</th></tr>
             <tr><td>ChatGPT Web + App (codex 포함)</td><td>프롬프트 + 응답</td><td>정규식 v2.1 · 대외비 AI v1.0</td><td><div class="toggle on"></div></td></tr>
             <tr><td>Claude Web + App</td><td>프롬프트 + 응답</td><td>정규식 v2.1 · 대외비 AI v1.0</td><td><div class="toggle on"></div></td></tr>
@@ -557,6 +574,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
             <tr><td>Copilot App</td><td>프롬프트 + 응답</td><td>정규식 v2.1</td><td><div class="toggle"></div></td></tr>
           </table>
           <div class="actions"><button class="btn ghost" onclick="openNDR()">+ 정책 추가</button><button class="btn">정책 저장</button></div>
+          <div class="note">대상 서비스는 Security Manager ‘AI 서비스 관리’에서 <b>AI 모니터에 적용된 서비스만</b> 표시·통제됩니다 — 신규 서비스는 SM에서 등록 후 적용.</div>
         </div>
       </div>
       <div class="tabc" id="ndr-1">
@@ -637,7 +655,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
       <div class="tabc on" id="rwp-0">
         <div class="card">
           <h3>기 설정 정책 — 격리 대상 서비스</h3>
-          <table>
+          <table id="rwpSvcTable">
             <tr><th>AI 서비스</th><th>접근 그룹</th><th>격리 사용</th></tr>
             <tr><td>chatgpt.com</td><td>전사</td><td><div class="toggle on"></div></td></tr>
             <tr><td>gemini.google.com</td><td>전사</td><td><div class="toggle on"></div></td></tr>
@@ -645,6 +663,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
             <tr><td>미분류 AI 서비스 (Shadow AI 연동)</td><td>차단</td><td><div class="toggle"></div></td></tr>
           </table>
           <div class="actions"><button class="btn ghost">+ 정책 추가</button><button class="btn">정책 저장</button></div>
+          <div class="note">격리 대상은 Security Manager ‘AI 서비스 관리’에서 <b>Remote Web Proxy에 적용된 서비스만</b> 선택할 수 있습니다.</div>
         </div>
       </div>
       <div class="tabc" id="rwp-1">
@@ -916,7 +935,7 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
         <tr><td>Office Copilot</td><td>-</td><td><div class="toggle on"></div></td><td>Outlook · PPT · Word · Excel</td></tr>
         <tr><td>Copilot App</td><td>-</td><td><div class="toggle"></div></td><td>-</td></tr>
       </table>
-      <div class="note">미허용 서비스 접근 시 차단 후 안내 메시지 표시 · 미등록 서비스는 Shadow AI 탐지(AI 모니터)와 연동됩니다.</div>
+      <div class="note">미허용 서비스 접근 시 차단 후 안내 메시지 표시 · 미등록 서비스는 Shadow AI 탐지(AI 모니터)와 연동됩니다. 대상 서비스 목록은 Security Manager ‘AI 서비스 관리’에서 <b>PC Proxy에 적용된 서비스만</b> 표시됩니다.</div>
       <div class="actions"><button class="btn" onclick="ppgo(1)">다음 →</button></div>
     </div>
 
@@ -965,6 +984,25 @@ select,input[type=text],input[type=number]{background:var(--bg);border:1px solid
   </div>
 </div>
 
+<!-- ============ AI 서비스 등록 모달 (Security Manager) ============ -->
+<div class="overlay" id="aiSvcModal">
+  <div class="modal">
+    <h2>AI 서비스 등록 <span class="ref">URL·프로세스명 등록 → 정책적용 제품 선택</span><span class="x" onclick="closeAISvc()">✕</span></h2>
+    <div class="frow"><label>AI 서비스 이름 *</label><input type="text" id="aiSvcName" placeholder="예: Perplexity" value="Perplexity" style="flex:1"></div>
+    <div class="frow"><label>URL (도메인·패턴)</label><input type="text" id="aiSvcUrls" placeholder="쉼표로 복수 입력 · 와일드카드(*) 지원" value="perplexity.ai, api.perplexity.ai" style="flex:1"></div>
+    <div class="frow"><label>프로세스명</label><input type="text" id="aiSvcProcs" placeholder="예: Perplexity.exe — PC Proxy에서만 통제" style="flex:1"></div>
+    <div class="frow" style="align-items:flex-start"><label style="padding-top:6px">정책적용 제품 (중복 선택)</label>
+      <div class="ckgrid" style="flex:1" id="aiSvcProds">
+        <div class="ck sel"><i>✓</i>AI 모니터</div>
+        <div class="ck"><i></i>PC Proxy</div>
+        <div class="ck sel"><i>✓</i>Remote Web Proxy</div>
+      </div>
+    </div>
+    <div class="note">URL 또는 프로세스명 중 1개 이상 필수. 프로세스명만 등록된 서비스는 PC Proxy 외 제품에서 통제 수단이 없습니다. 등록 시 선택한 제품의 정책 화면에 통제 대상으로 추가됩니다.</div>
+    <div class="actions"><button class="btn ghost" onclick="closeAISvc()">취소</button><button class="btn" onclick="saveAISvc()">등록 — 카탈로그에 추가</button></div>
+  </div>
+</div>
+
 <script>
 function go(p){
   document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.p===p&&a.dataset.i===undefined));
@@ -991,7 +1029,7 @@ document.querySelectorAll('.tabs').forEach(t=>{
     document.querySelectorAll('[id^="'+key+'-"]').forEach(c=>c.classList.toggle('on',c.id===key+'-'+i));
   }));
 });
-document.querySelectorAll('.toggle').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('on')));
+document.addEventListener('click',e=>{const t=e.target.closest('.toggle');if(t)t.classList.toggle('on');});
 document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('sel')));
 document.querySelectorAll('.ck').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('sel');c.querySelector('i').textContent=c.classList.contains('sel')?'✓':'';}));
 document.querySelectorAll('.radio').forEach(r=>r.addEventListener('click',()=>{
@@ -1036,6 +1074,28 @@ function saveLPSvc(){
   closeLPSvc();
 }
 document.getElementById('lpSvcModal').addEventListener('click',e=>{if(e.target.id==='lpSvcModal')closeLPSvc();});
+/* Security Manager — AI 서비스 등록 모달 */
+function openAISvc(){document.getElementById('aiSvcModal').classList.add('on');}
+function closeAISvc(){document.getElementById('aiSvcModal').classList.remove('on');}
+function saveAISvc(){
+  const name=document.getElementById('aiSvcName').value.trim()||'신규 AI 서비스';
+  const urls=document.getElementById('aiSvcUrls').value.trim();
+  const procs=document.getElementById('aiSvcProcs').value.trim();
+  const prods=[...document.querySelectorAll('#aiSvcProds .ck.sel')].map(c=>c.textContent.replace('✓','').trim());
+  if(!urls&&!procs){alert('URL 또는 프로세스명을 1개 이상 등록해야 합니다.');return;}
+  if(prods.length===0){alert('정책적용 제품을 1개 이상 선택하세요.');return;}
+  if(procs&&!urls&&!prods.includes('PC Proxy')){alert('프로세스명은 PC Proxy에서만 통제됩니다 — 선택한 제품에는 통제 수단이 없습니다.');return;}
+  const ids=[urls?`<code>${urls}</code>`:'',procs?`<code>${procs}</code>`:''].filter(Boolean).join(' · ');
+  const prodHtml=prods.map(p=>`<span class="pill p-info">${p}</span>`).join(' ');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${name}</td><td>${ids}</td><td>사용자 등록</td><td>${prodHtml}</td><td><span class="pill p-warn">배포 대기</span></td>`;
+  document.getElementById('aiSvcTable').appendChild(tr);
+  /* 적용 제품의 정책 화면에 통제 대상으로 반영 — "적용된 서비스만 통제 가능" */
+  if(prods.includes('AI 모니터')){const r=document.createElement('tr');r.innerHTML=`<td>${name}</td><td>프롬프트</td><td>정규식 v2.1</td><td><div class="toggle on"></div></td>`;document.getElementById('ndrSvcTable').appendChild(r);}
+  if(prods.includes('Remote Web Proxy')){const r=document.createElement('tr');r.innerHTML=`<td>${(urls.split(',')[0]||name).trim()}</td><td>전사</td><td><div class="toggle on"></div></td>`;document.getElementById('rwpSvcTable').appendChild(r);}
+  closeAISvc();
+}
+document.getElementById('aiSvcModal').addEventListener('click',e=>{if(e.target.id==='aiSvcModal')closeAISvc();});
 </script>
 </body>
 </html>
