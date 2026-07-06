@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-R One — AI Security Platform</title>
+<style>
+:root{
+  --bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--border:#2b3548;
+  --txt:#e6edf3;--dim:#8b98ab;--accent:#4f8ef7;--accent2:#7c5cff;
+  --ok:#3fb950;--warn:#d29922;--bad:#f85149;--chip:#233046;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Malgun Gothic',sans-serif}
+body{background:var(--bg);color:var(--txt);font-size:14px}
+.app{display:flex;height:100vh;overflow:hidden}
+/* sidebar */
+.side{width:230px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.logo{padding:18px 16px;border-bottom:1px solid var(--border)}
+.logo b{font-size:18px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo span{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+.nav{flex:1;overflow-y:auto;padding:10px 8px}
+.nav h4{font-size:11px;color:var(--dim);margin:14px 10px 6px;text-transform:uppercase;letter-spacing:.5px}
+.nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--txt);text-decoration:none;cursor:pointer;font-size:13px}
+.nav a:hover{background:var(--panel2)}
+.nav a.on{background:linear-gradient(90deg,rgba(79,142,247,.18),rgba(124,92,255,.12));color:#fff;border-left:3px solid var(--accent);padding-left:7px}
+.nav a.subm{padding:6px 10px 6px 34px;font-size:12.5px;color:var(--dim)}
+.nav a.subm.on{color:#fff;border-left:3px solid var(--accent);padding-left:31px}
+.nav a.grp .caret{margin-left:auto;font-size:10px;color:var(--dim);transition:transform .15s;padding:2px 4px}
+.nav a.grp.closed .caret{transform:rotate(-90deg)}
+.nav .submgrp{overflow:hidden;max-height:300px;transition:max-height .2s ease}
+.nav .submgrp.closed{max-height:0}
+.navnote{padding:12px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--dim);line-height:1.6}
+/* main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.top{height:56px;border-bottom:1px solid var(--border);background:var(--panel);display:flex;align-items:center;gap:14px;padding:0 20px;flex-shrink:0}
+.gsearch{flex:1;max-width:520px;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:7px 12px;color:var(--dim);cursor:pointer}
+.gsearch input{flex:1;background:none;border:none;color:var(--txt);outline:none;font-size:13px}
+.who{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--dim)}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px}
+.content{flex:1;overflow-y:auto;padding:22px}
+.page{display:none}.page.on{display:block}
+h2{font-size:18px;margin-bottom:4px}
+.sub{color:var(--dim);font-size:12px;margin-bottom:18px}
+.phead{display:flex;align-items:flex-start;gap:12px}
+.phead .grow{flex:1}
+/* cards */
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:2fr 1fr}.g22{grid-template-columns:1fr 1fr}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px}
+.kpi .lbl{font-size:12px;color:var(--dim)}
+.kpi .val{font-size:26px;font-weight:700;margin:6px 0 2px}
+.kpi .d{font-size:11px;color:var(--dim)}
+.up{color:var(--bad)}.down{color:var(--ok)}
+.card h3{font-size:13px;margin-bottom:12px;color:var(--txt)}
+.ref{font-size:10px;color:var(--dim);background:var(--chip);border-radius:8px;padding:1px 7px;margin-left:6px;font-weight:400;vertical-align:1px}
+/* bar chart */
+.bars{display:flex;align-items:flex-end;gap:14px;height:140px;padding-top:6px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bar i{width:100%;max-width:44px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--accent),#2b5bb8)}
+.bar i.sw{background:linear-gradient(180deg,var(--warn),#8a6410)}
+.bar em{font-style:normal;font-size:11px;color:var(--dim)}
+.bar b{font-size:11px}
+/* stacked ratio bar */
+.ratio{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:8px 0 6px}
+.ratio i{height:100%}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--dim);flex-wrap:wrap}
+.legend b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--dim);font-weight:600;font-size:11px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.4px}
+td{padding:9px 10px;border-bottom:1px solid #202839}
+tr:hover td{background:var(--panel2)}
+.pill{display:inline-block;font-size:11px;border-radius:12px;padding:2px 9px}
+.p-ok{background:rgba(63,185,80,.15);color:var(--ok)}
+.p-warn{background:rgba(210,153,34,.15);color:var(--warn)}
+.p-bad{background:rgba(248,81,73,.15);color:var(--bad)}
+.p-info{background:rgba(79,142,247,.15);color:var(--accent)}
+.p-dim{background:var(--chip);color:var(--dim)}
+.p-new{background:rgba(124,92,255,.2);color:#b39dff}
+mark{background:rgba(248,81,73,.22);color:#ffb1ab;border-radius:3px;padding:0 3px}
+/* product status */
+.prod{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #202839;font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.off{background:var(--dim)}
+.prod small{margin-left:auto;color:var(--dim);font-size:11px}
+/* forms */
+.frow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #202839;font-size:13px}
+.frow label{width:200px;color:var(--dim);flex-shrink:0}
+select,input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--border);color:var(--txt);border-radius:8px;padding:7px 10px;font-size:13px;outline:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--chip);border-radius:14px;padding:3px 11px;font-size:12px;cursor:pointer}
+.chip.sel{background:rgba(79,142,247,.22);color:var(--accent);border:1px solid var(--accent)}
+.toggle{width:38px;height:20px;border-radius:12px;background:var(--chip);position:relative;cursor:pointer;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle:after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.toggle.on:after{left:20px}
+.btn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff;border-radius:8px;padding:8px 18px;font-size:13px;cursor:pointer}
+.btn.ghost{background:var(--chip);color:var(--txt)}
+.actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+/* tabs */
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.tabs span{padding:8px 16px;cursor:pointer;color:var(--dim);font-size:13px;border-bottom:2px solid transparent}
+.tabs span.on{color:var(--txt);border-bottom-color:var(--accent)}
+.tabc{display:none}.tabc.on{display:block}
+/* event stream */
+.ev{display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid #202839;font-size:12.5px;align-items:center}
+.ev time{color:var(--dim);font-size:11px;width:56px;flex-shrink:0}
+.ev .src{width:110px;flex-shrink:0;color:var(--accent)}
+.mt{margin-top:14px}
+.note{font-size:11.5px;color:var(--dim);margin-top:10px;line-height:1.5}
+.searchbox{display:flex;gap:8px;margin-bottom:14px}
+.searchbox input{flex:1}
+.risk{font-weight:700}
+/* search condition panel */
+.cond{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;margin-bottom:14px}
+.cond .f{display:flex;flex-direction:column;gap:5px;font-size:12px}
+.cond .f label{color:var(--dim);font-size:11px}
+.rulebox{border:1px solid rgba(124,92,255,.45);background:rgba(124,92,255,.07);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.rulebox .rt{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;font-weight:600}
+/* report modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(4,8,15,.72);z-index:50;align-items:center;justify-content:center}
+.overlay.on{display:flex}
+.modal{width:760px;max-width:94vw;max-height:90vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px}
+.modal h2{display:flex;align-items:center}
+.modal .x{margin-left:auto;cursor:pointer;color:var(--dim);font-size:18px;padding:0 6px}
+.wiz{display:flex;gap:6px;margin:14px 0 18px}
+.wiz span{flex:1;text-align:center;font-size:12px;padding:8px 4px;border-radius:8px;background:var(--panel2);color:var(--dim);cursor:pointer;border:1px solid transparent}
+.wiz span.on{background:rgba(79,142,247,.16);color:var(--accent);border-color:var(--accent)}
+.wstep{display:none}.wstep.on{display:block}
+.radio{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;font-size:13px}
+.radio.sel{border-color:var(--accent);background:rgba(79,142,247,.08)}
+.radio b{display:block;font-size:13px}
+.radio small{color:var(--dim);font-size:11.5px;line-height:1.5}
+.ckgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ck{display:flex;gap:8px;align-items:center;padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:12.5px;cursor:pointer}
+.ck.sel{border-color:var(--accent);background:rgba(79,142,247,.08)}
+.ck i{font-style:normal;width:16px;height:16px;border-radius:4px;border:1px solid var(--dim);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.ck.sel i{background:var(--accent);border-color:var(--accent);color:#fff}
+.preview{border:1px dashed var(--border);border-radius:10px;padding:14px;font-size:12px;color:var(--dim);line-height:1.7;background:var(--bg)}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2,.g22{grid-template-columns:1fr}.cond{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><b>AI-R One</b><span>AI Security Platform</span></div>
+    <nav class="nav">
+      <h4>플랫폼</h4>
+      <a class="on" data-p="dash">📊 통합 대시보드</a>
+      <a data-p="mon">📡 통합 모니터링</a>
+      <a data-p="search">🔍 통합 검색</a>
+      <a data-p="sm">🧩 Security Manager</a>
+      <h4>제품정책관리</h4>
+      <a class="grp" data-p="ndr" data-g="ndr">🌐 AI 모니터<span class="caret">▾</span></a>
+      <div class="submgrp" id="g-ndr">
+        <a class="subm" data-p="ndr" data-t="ndr" data-i="0">프롬프트 수집 정책</a>
+        <a class="subm" data-p="ndr" data-t="ndr" data-i="1">Shadow AI 탐지 정책</a>
+      </div>
+      <a class="grp" data-p="pp" data-g="pp">💻 PC Proxy<span class="caret">▾</span></a>
+      <div class="submgrp" id="g-pp">
+        <a class="subm" data-p="pp" data-t="pp" data-i="0">정책 관리</a>
+        <a class="subm" data-p="pp" data-t="pp" data-i="1">설치 현황</a>
+        <a class="subm" data-p="pp" data-t="pp" data-i="2">예외 신청</a>
+      </div>
+      <a class="grp" data-p="rbi" data-g="rbi">🛡️ Remote Web Proxy<span class="caret">▾</span></a>
+      <div class="submgrp" id="g-rbi">
+        <a class="subm" data-p="rbi" data-t="rwp" data-i="0">정책 관리</a>
+        <a class="subm" data-p="rbi" data-t="rwp" data-i="1">설정</a>
+      </div>
+      <a class="grp" data-p="lp" data-g="lp">🔗 LLM Proxy<span class="caret">▾</span></a>
+      <div class="submgrp" id="g-lp">
+        <a class="subm" data-p="lp" data-t="lp" data-i="0">기본 정책</a>
+        <a class="subm" data-p="lp" data-t="lp" data-i="1">API 사용 신청</a>
+        <a class="subm" data-p="lp" data-t="lp" data-i="2">사용 승인 관리</a>
+        <a class="subm" data-p="lp" data-t="lp" data-i="3">Provider · Key 관리</a>
+        <a class="subm" data-p="lp" data-t="lp" data-i="4">비용 · 한도 관리</a>
+        <a class="subm" data-p="lp" data-t="lp" data-i="5">장애 전환 정책</a>
+      </div>
+    </nav>
+    <div class="navnote">국가·공공기관 AI보안 가이드북 v2.0 대응</div>
+  </aside>
+  <div class="main">
+    <div class="top">
+      <div class="gsearch" onclick="go('search')">🔍 <input placeholder="통합 검색 — 사용자, AI 서비스, 프롬프트, 규정, App…" readonly></div>
+      <div class="who"><span>AI 보안 관리자</span><div class="avatar">최</div></div>
+    </div>
+    <div class="content">
+
+    <!-- ============ 통합 대시보드 ============ -->
+    <section class="page on" id="p-dash">
+      <h2>통합 대시보드</h2>
+      <div class="sub">핵심 지표 — "지금 위험한가 → 통제되고 있는가 → 체계가 살아있는가" &nbsp;|&nbsp; 2026-07-03 기준</div>
+
+      <div class="grid g4">
+        <div class="card kpi"><div class="lbl">① 민감정보 입력·유출 탐지 (금일)</div><div class="val">31</div>
+          <div class="ratio"><i style="width:39%;background:var(--bad)"></i><i style="width:29%;background:var(--warn)"></i><i style="width:32%;background:var(--chip)"></i></div>
+          <div class="legend"><span><b style="background:var(--bad)"></b>차단 12</span><span><b style="background:var(--warn)"></b>경고 9</span><span><b style="background:var(--chip)"></b>로깅 10</span></div></div>
+        <div class="card kpi"><div class="lbl">② Shadow AI 탐지</div><div class="val">9</div><div class="d up">신규 3건 · 사용자 12명</div></div>
+        <div class="card kpi"><div class="lbl">③ 정책 위반 (금주)</div><div class="val">47</div><div class="d up">▲ 12건 — 민감정보 31 · 우회 5</div></div>
+        <div class="card kpi"><div class="lbl">⑤ LLM API 비용 (당월)</div><div class="val">$8,420</div><div class="d">예산 소진 67% · 한도 임박 App 2</div></div>
+      </div>
+
+      <div class="grid g2 mt">
+        <div class="card">
+          <h3>④ AI 서비스별 사용량 — 승인/미승인 구분</h3>
+          <div class="bars">
+            <div class="bar"><b>412</b><i style="height:82%"></i><em>ChatGPT ✓</em></div>
+            <div class="bar"><b>355</b><i style="height:70%"></i><em>Claude ✓</em></div>
+            <div class="bar"><b>238</b><i style="height:48%"></i><em>Copilot ✓</em></div>
+            <div class="bar"><b>171</b><i style="height:34%"></i><em>Gemini ✓</em></div>
+            <div class="bar"><b>96</b><i class="sw" style="height:19%"></i><em>미승인(Shadow)</em></div>
+            <div class="bar"><b>64</b><i style="height:13%"></i><em>내부 App ✓</em></div>
+          </div>
+          <div class="note">채널: Web / App / API 구분 드릴다운 지원. ✓ = 기관 승인 서비스.</div>
+        </div>
+        <div class="card">
+          <h3>⑥ 위험 사용자 스코어 Top 5</h3>
+          <table>
+            <tr><th>사용자</th><th>부서</th><th>점수</th></tr>
+            <tr><td>김민준</td><td>연구소</td><td class="risk" style="color:var(--bad)">92</td></tr>
+            <tr><td>박지훈</td><td>사업부</td><td class="risk" style="color:var(--bad)">85</td></tr>
+            <tr><td>이서연</td><td>재무</td><td class="risk" style="color:var(--warn)">64</td></tr>
+            <tr><td>최도윤</td><td>개발</td><td class="risk" style="color:var(--warn)">58</td></tr>
+            <tr><td>한지우</td><td>HR</td><td class="risk" style="color:var(--warn)">51</td></tr>
+          </table>
+          <div class="note">이상행위 상관분석 기반. 클릭 시 통합 검색 타임라인으로 이동.</div>
+        </div>
+      </div>
+
+      <div class="grid g3 mt">
+        <div class="card">
+          <h3>⑦ 수집기·하위 제품 연결 상태</h3>
+          <div class="prod"><span class="dot ok"></span>AI Monitor<small>수집 1.2M/일 · 정상</small></div>
+          <div class="prod"><span class="dot ok"></span>PC Proxy<small>설치 1,102 / 1,284</small></div>
+          <div class="prod"><span class="dot warn"></span>Remote Web Proxy<small>세션 지연 ↑</small></div>
+          <div class="prod"><span class="dot ok"></span>LLM Proxy<small>App 23 · 오류율 0.3%</small></div>
+          <div class="note">로그 수집 커버리지 94.2% — 미수집 구간 = 탐지 불가 구간</div>
+        </div>
+        <div class="card">
+          <h3>⑧ 필터링·가드레일 정책 적용 현황</h3>
+          <table>
+            <tr><th>검사 규정</th><th>버전</th><th>미적용</th></tr>
+            <tr><td>개인정보 정규식 검사</td><td>v2.1</td><td><span class="pill p-ok">0</span></td></tr>
+            <tr><td>개인정보 AI 검사</td><td>v1.3</td><td><span class="pill p-warn">단말 24</span></td></tr>
+            <tr><td>대외비 AI 검사</td><td>v1.0</td><td><span class="pill p-warn">채널 1</span></td></tr>
+            <tr><td>CSO등급 검사</td><td>v1.0</td><td><span class="pill p-ok">0</span></td></tr>
+            <tr><td>LLM결과 검사</td><td>v0.9</td><td><span class="pill p-dim">검증 중</span></td></tr>
+            <tr><td>이상행위 검사</td><td>v1.0</td><td><span class="pill p-ok">0</span></td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>⑨ 승인 대기 큐</h3>
+          <table>
+            <tr><th>유형</th><th>대기</th><th>최장 경과</th></tr>
+            <tr><td>민감정보 사용 승인</td><td>4</td><td><span class="pill p-warn">26h</span></td></tr>
+            <tr><td>예외 신청</td><td>2</td><td><span class="pill p-ok">3h</span></td></tr>
+            <tr><td>API 사용 신청</td><td>1</td><td><span class="pill p-ok">1h</span></td></tr>
+          </table>
+          <div class="note">승인 지연은 우회 사용을 유발 — SLA 24h 초과 시 경고</div>
+        </div>
+      </div>
+
+      <div class="card mt">
+        <h3>③ 정책 위반 Top 부서·사용자 (금주)</h3>
+        <table>
+          <tr><th>순위</th><th>부서</th><th>위반</th><th>주요 유형</th><th>Top 사용자</th><th>추이</th></tr>
+          <tr><td>1</td><td>연구소</td><td>18</td><td>민감정보 12 · 파일첨부 6</td><td>김민준 (7)</td><td class="up">▲ 5</td></tr>
+          <tr><td>2</td><td>사업부</td><td>11</td><td>정책 우회 5 · 심야 사용 6</td><td>박지훈 (5)</td><td class="up">▲ 2</td></tr>
+          <tr><td>3</td><td>재무</td><td>8</td><td>개인정보 포함 프롬프트 8</td><td>이서연 (3)</td><td class="down">▼ 1</td></tr>
+          <tr><td>4</td><td>개발본부</td><td>6</td><td>미승인 모델 호출 4</td><td>최도윤 (4)</td><td>—</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 통합 모니터링 ============ -->
+    <section class="page" id="p-mon">
+      <div class="phead">
+        <div class="grow">
+          <h2>통합 모니터링</h2>
+          <div class="sub">실시간 유출 시도 스트림 · 임계 알림 · 이상행위 상관분석 · 단말 AI Agent 행위 추적 — 전 채널 상관 분석</div>
+        </div>
+        <button class="btn" onclick="openReport()">📄 운영보고서 생성</button>
+      </div>
+
+      <div class="grid g22">
+        <div class="card">
+          <h3>① 실시간 민감정보 유출 시도 스트림 <span class="pill p-ok" style="margin-left:6px">LIVE</span></h3>
+          <div class="ev"><time>14:26:11</time><span class="src">PC Proxy</span>김민준 — 개인정보 12건 포함 프롬프트 (ChatGPT App)<span class="pill p-bad" style="margin-left:auto">차단</span></div>
+          <div class="ev"><time>14:25:40</time><span class="src">AI Monitor</span>이서연 — 주민등록번호 패턴 1건 (Claude Web)<span class="pill p-warn" style="margin-left:auto">경고</span></div>
+          <div class="ev"><time>14:24:58</time><span class="src">Remote Web Proxy</span>박지훈 — DRM 등급 문서 업로드 시도<span class="pill p-bad" style="margin-left:auto">차단</span></div>
+          <div class="ev"><time>14:24:12</time><span class="src">LLM Proxy</span>ERP-Assist — 계좌번호 마스킹 처리 후 전송<span class="pill p-info" style="margin-left:auto">마스킹</span></div>
+          <div class="ev"><time>14:23:47</time><span class="src">AI Monitor</span>정하늘 — 검사 통과 (기밀 키워드 없음)<span class="pill p-dim" style="margin-left:auto">로깅</span></div>
+        </div>
+        <div class="card">
+          <h3>② 대량 전송·과다 호출 임계 알림</h3>
+          <table>
+            <tr><th>대상</th><th>지표</th><th>현재/임계</th><th>상태</th></tr>
+            <tr><td>CS-Bot (App)</td><td>호출 RPM</td><td>58 / 60</td><td><span class="pill p-warn">임박</span></td></tr>
+            <tr><td>박지훈</td><td>전송량/시간</td><td>14,200자 / 10,000자</td><td><span class="pill p-bad">초과 — 통제</span></td></tr>
+            <tr><td>ERP-Assist</td><td>월 예산</td><td>82% / 80%</td><td><span class="pill p-warn">알림 발송</span></td></tr>
+            <tr><td>연구소 (부서)</td><td>일 요청량</td><td>+310% (평균 대비)</td><td><span class="pill p-warn">확인 필요</span></td></tr>
+          </table>
+          <div class="note">사용자/App별 전송량·호출수 임계 초과 실시간 경보</div>
+        </div>
+      </div>
+
+      <div class="grid g22 mt">
+        <div class="card">
+          <h3>③ 이상 사용행위 상관분석</h3>
+          <table>
+            <tr><th>탐지 규칙</th><th>대상</th><th>금주</th><th>위험점수 반영</th></tr>
+            <tr><td>심야(22~06시) 사용 급증</td><td>박지훈</td><td>6</td><td>85 <span class="up">▲12</span></td></tr>
+            <tr><td>정책 우회 시도 (프록시 변경)</td><td>박지훈</td><td>2</td><td>85 <span class="up">▲8</span></td></tr>
+            <tr><td>반복 민감정보 전송 (3회↑)</td><td>김민준</td><td>7</td><td>92 <span class="up">▲15</span></td></tr>
+            <tr><td>부서 평균 대비 사용 급증</td><td>연구소</td><td>1</td><td>부서 경보</td></tr>
+          </table>
+          <div class="note">제품 간 이벤트 상관 탐지 → 위험 사용자 스코어 자동 갱신</div>
+        </div>
+        <div class="card">
+          <h3>④ 단말 AI Agent 행위 모니터링</h3>
+          <table>
+          <tr><th>시각</th><th>사용자 / Agent</th><th>행위</th><th>판정</th><th>처리</th></tr>
+          <tr><td>14:22</td><td>최도윤 / codex</td><td>내부 저장소 외 경로 파일 접근 (~/.ssh)</td><td>금지행위</td><td><span class="pill p-bad">자동 차단</span></td></tr>
+          <tr><td>14:08</td><td>정하늘 / Claude App</td><td>화이트리스트 도구 호출 (파일 읽기 · 허용 경로)</td><td>정상</td><td><span class="pill p-dim">로깅</span></td></tr>
+          <tr><td>13:51</td><td>최도윤 / codex</td><td>셸 명령 실행 요청 (rm -rf) — 민감명령</td><td>승인 필요</td><td><span class="pill p-warn">승인 대기</span></td></tr>
+          <tr><td>13:34</td><td>김민준 / Gemini App</td><td>도구 호출량 급증 (84회/10min)</td><td>이상 징후</td><td><span class="pill p-warn">경고</span></td></tr>
+        </table>
+          <div class="note">화이트리스트 외 도구 호출 차단 · 민감명령 승인 절차 연동</div>
+        </div>
+      </div>
+
+      <div class="grid g22 mt">
+        <div class="card">
+          <h3>⑤ Shadow AI 사용 현황 <span class="ref">AI 모니터 탐지 기반</span></h3>
+          <table>
+            <tr><th>서비스</th><th>유형</th><th>사용자</th><th>금주 접속</th><th>최초 탐지</th><th>상태</th></tr>
+            <tr><td>chat-x.io</td><td>웹</td><td>12</td><td>96</td><td>06-28</td><td><span class="pill p-warn">차단 전환 대기</span></td></tr>
+            <tr><td>deepseek 웹</td><td>웹</td><td>5</td><td>34</td><td>07-01</td><td><span class="pill p-info">검토 중</span></td></tr>
+            <tr><td>llama-local (사설 LLM)</td><td>설치형</td><td>2</td><td>11</td><td>07-02</td><td><span class="pill p-new">신규</span></td></tr>
+            <tr><td>translate-ai.app</td><td>웹</td><td>3</td><td>18</td><td>06-30</td><td><span class="pill p-bad">차단됨</span></td></tr>
+          </table>
+          <div class="note">미등록 AI 서비스 트래픽 자동 탐지 — 탐지 즉시 소급 검사 및 정책 전환(허용/차단) 워크플로 연동</div>
+        </div>
+        <div class="card">
+          <h3>⑥ 문서 등급별 접근 현황 <span class="ref">AI 채널 첨부·업로드 (금주)</span></h3>
+          <table>
+            <tr><th>문서 등급</th><th>시도</th><th>허용</th><th>마스킹</th><th>차단</th></tr>
+            <tr><td>일반</td><td>214</td><td>209</td><td>—</td><td><span class="pill p-dim">5</span></td></tr>
+            <tr><td>대외비</td><td>57</td><td>12</td><td>31</td><td><span class="pill p-warn">14</span></td></tr>
+            <tr><td>비밀</td><td>9</td><td>0</td><td>0</td><td><span class="pill p-bad">9</span></td></tr>
+            <tr><td>CSO등급</td><td>3</td><td>0</td><td>0</td><td><span class="pill p-bad">3</span></td></tr>
+          </table>
+          <div class="note">DRM·문서등급 연동 — 등급별 AI 채널 반출 통제. 비밀 이상 등급은 전면 차단 정책 적용 중</div>
+        </div>
+      </div>
+
+      <div class="grid g22 mt">
+        <div class="card">
+          <h3>⑦ AI 웹서비스 사용현황</h3>
+          <table>
+            <tr><th>서비스</th><th>사용자</th><th>세션(금일)</th><th>프롬프트</th><th>정책 처리</th></tr>
+            <tr><td>ChatGPT Web <span class="pill p-ok">승인</span></td><td>231</td><td>412</td><td>3,120</td><td>차단 4 · 경고 6</td></tr>
+            <tr><td>Claude Web <span class="pill p-ok">승인</span></td><td>187</td><td>355</td><td>2,860</td><td>차단 2 · 경고 3</td></tr>
+            <tr><td>Gemini Web <span class="pill p-ok">승인</span></td><td>92</td><td>171</td><td>1,240</td><td>경고 1</td></tr>
+            <tr><td>미승인 (Shadow)</td><td>12</td><td>96</td><td>310</td><td><span class="pill p-warn">로깅 → 소급검사</span></td></tr>
+          </table>
+          <div class="note">채널별(Web) 사용량·정책 처리 결과 — 클릭 시 통합 검색으로 드릴다운</div>
+        </div>
+        <div class="card">
+          <h3>⑧ 설치형 Agent 사용현황</h3>
+          <table>
+            <tr><th>Agent</th><th>설치 단말</th><th>활성(금일)</th><th>도구 호출</th><th>위반·이상</th></tr>
+            <tr><td>Claude App</td><td>208</td><td>84</td><td>1,204</td><td><span class="pill p-ok">0</span></td></tr>
+            <tr><td>codex</td><td>57</td><td>31</td><td>2,410</td><td><span class="pill p-bad">금지행위 1</span> <span class="pill p-warn">승인대기 1</span></td></tr>
+            <tr><td>Copilot App</td><td>174</td><td>96</td><td>880</td><td><span class="pill p-ok">0</span></td></tr>
+            <tr><td>Gemini App · Antigravity</td><td>63</td><td>22</td><td>640</td><td><span class="pill p-warn">이상 징후 1</span></td></tr>
+          </table>
+          <div class="note">단말 설치형 AI Agent의 도구 호출·행위 통계 — ④ 행위 모니터링과 연동</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 통합 검색 ============ -->
+    <section class="page" id="p-search">
+      <h2>통합 검색</h2>
+      <div class="sub">사용자 · AI 서비스 · 프롬프트 · 정책 처리 결과를 채널 경계 없이 검색 — 사후 원인 분석 지원</div>
+      <div class="card">
+        <div class="searchbox"><input type="text" value="김민준"><button class="btn">검색</button></div>
+
+        <div class="cond">
+          <div class="f"><label>① 기간 (시각 범위)</label><select><option>최근 7일</option><option selected>사고 시점 전후 24h (07-02 14:25 기준)</option><option>최근 30일</option><option>직접 지정…</option></select></div>
+          <div class="f"><label>② 사용자 / 부서 / 계정</label><input type="text" value="김민준 (연구소)"></div>
+          <div class="f"><label>③ 검색 대상 채널</label><select><option selected>전체 채널</option><option>AI Monitor</option><option>PC Proxy</option><option>Remote Web Proxy</option><option>LLM Proxy</option></select></div>
+          <div class="f"><label>④ AI 서비스 / 모델 / App</label><select><option selected>전체 (승인 + Shadow)</option><option>승인 서비스만</option><option>Shadow AI만</option><option>ChatGPT</option><option>Claude</option></select></div>
+          <div class="f"><label>⑤ 이벤트 유형</label><select><option selected>전체</option><option>민감정보 탐지</option><option>Shadow AI</option><option>한도 초과</option><option>Agent 금지행위</option></select></div>
+          <div class="f"><label>⑥ 처리 결과</label><select><option selected>전체</option><option>차단</option><option>경고</option><option>로깅</option><option>승인</option></select></div>
+          <div class="f"><label>⑦ 민감정보 유형</label><select><option selected>전체</option><option>개인정보</option><option>기밀</option><option>소스코드</option></select></div>
+        </div>
+
+        <div class="rulebox">
+          <div class="rt">🧩 규정기반 검색 <span class="pill p-new">NEW</span><span class="note" style="margin:0">Security Manager에 정의된 검사 규정에 매칭되는 로그를 검색</span></div>
+          <div class="cond" style="margin-bottom:0">
+            <div class="f"><label>검사 방식</label><select id="ruleType"><option selected>정규식 검사</option><option>개인정보 AI 검사</option><option>대외비 AI 검사</option><option>CSO등급 검사</option><option>LLM결과 검사</option><option>이상행위 검사</option></select></div>
+            <div class="f"><label>규정 선택</label><select><option selected>주민등록번호 규정 v2.1</option><option>계좌·카드번호 규정 v2.1</option><option>전화번호 규정 v2.0</option><option>API Key·자격증명 규정 v1.2</option></select></div>
+            <div class="f"><label>매칭 조건</label><select><option selected>규정 매칭 이력 전체</option><option>차단된 건만</option><option>규정 버전 지정 검색</option></select></div>
+          </div>
+          <div class="note">과거 로그 재검사도 지원 — 신규 규정 배포 시 소급 탐지</div>
+        </div>
+
+        <div class="chips" style="margin-bottom:14px">
+          <span class="chip sel">기간: 사고 전후 24h</span><span class="chip sel">사용자: 김민준</span><span class="chip sel">채널: 전체</span><span class="chip sel">규정: 주민등록번호 v2.1 (정규식)</span><span class="chip">처리: 차단</span>
+        </div>
+
+        <table>
+          <tr><th>시각</th><th>제품(경로)</th><th>사용자·단말</th><th>AI 서비스/모델</th><th>매칭 내용 (하이라이트)</th><th>적용 규정·버전</th><th>처리</th></tr>
+          <tr><td>07-02 14:25</td><td>PC Proxy</td><td>김민준 · PC-R1042</td><td>ChatGPT App</td><td>…고객 명단 <mark>900101-1******</mark> 외 11건…</td><td>주민등록번호 v2.1</td><td><span class="pill p-bad">차단</span></td></tr>
+          <tr><td>07-02 11:03</td><td>AI Monitor</td><td>김민준 · PC-R1042</td><td>Claude Web</td><td>…연락처 <mark>010-4XXX-XXXX</mark> 포함…</td><td>전화번호 v2.0</td><td><span class="pill p-warn">경고</span></td></tr>
+          <tr><td>07-01 22:41</td><td>AI Monitor</td><td>김민준 · PC-R1042</td><td>chat-x.io (Shadow)</td><td>미등록 AI 서비스 접속 — 재검사 시 <mark>주민번호 2건</mark> 매칭</td><td>주민등록번호 v2.1 (소급)</td><td><span class="pill p-info">기록</span></td></tr>
+          <tr><td>06-30 09:12</td><td>PC Proxy</td><td>김민준 · PC-R1042</td><td>codex</td><td>첨부: report.py (해시 a3f1… · DRM 3등급)</td><td>파일첨부 규정 v1.1</td><td><span class="pill p-ok">허용</span></td></tr>
+        </table>
+        <div class="actions">
+          <button class="btn ghost">🕒 사용자 행위 타임라인 보기</button>
+          <button class="btn ghost">📄 사고 대응 보고서로 전환</button>
+        </div>
+        <div class="note">프롬프트 원문 열람은 열람 권한 정책에 따라 마스킹 또는 승인 후 표시됩니다. 검색 결과에는 적용 규정·버전, 행위 주체, 첨부 메타데이터가 포함됩니다.</div>
+      </div>
+    </section>
+
+    <!-- ============ Security Manager ============ -->
+    <section class="page" id="p-sm">
+      <h2>Security Manager <span class="pill p-info">플랫폼 공통 — 검사 규정 허브</span></h2>
+      <div class="sub">검사 규정을 방식별로 정의하고 전 채널(AI Monitor · PC Proxy · Remote Web Proxy · LLM Proxy)에 공통 배포 — 가드레일 다중화</div>
+      <div class="tabs" data-t="sm"><span class="on">정규식 검사</span><span>개인정보 AI 검사</span><span>대외비 AI 검사</span><span>CSO등급 검사</span><span>LLM결과 검사</span><span>이상행위 검사</span></div>
+
+      <div class="tabc on" id="sm-0">
+        <div class="card">
+          <h3>정규식 검사 규정 <span class="ref">패턴 일치 — 저지연 · 전 채널 1차 필터</span></h3>
+          <table>
+            <tr><th>규정</th><th>패턴 (예시)</th><th>버전</th><th>배포 대상</th><th>금주 탐지</th><th>상태</th></tr>
+            <tr><td>주민등록번호 규정</td><td><code>\d{6}-[1-4]\d{6}</code></td><td>v2.1</td><td>전 채널</td><td>23</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>계좌·카드번호 규정</td><td><code>\d{4}-\d{4}-\d{4}-\d{4}</code> 외 6종</td><td>v2.1</td><td>전 채널</td><td>8</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>전화번호 규정</td><td><code>01[016789]-\d{3,4}-\d{4}</code></td><td>v2.0</td><td>전 채널</td><td>41</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>여권번호 규정</td><td><code>[MSRODC]\d{8}</code></td><td>v1.0</td><td>AI Monitor · PC Proxy</td><td>2</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>API Key·자격증명 규정</td><td><code>sk-[A-Za-z0-9]{20,}</code> 외 12종</td><td>v1.2</td><td>PC Proxy · LLM Proxy</td><td>5</td><td><span class="pill p-warn">배포 대기</span></td></tr>
+          </table>
+          <div class="actions"><button class="btn ghost">+ 규정 추가</button><button class="btn">선택 규정 배포</button></div>
+        </div>
+      </div>
+
+      <div class="tabc" id="sm-1">
+        <div class="card">
+          <h3>개인정보 AI 검사 규정 <span class="ref">AI 문맥 분석 — 패턴 없는 개인정보 탐지</span></h3>
+          <table>
+            <tr><th>규정</th><th>탐지 대상 (문맥)</th><th>모델/버전</th><th>배포 대상</th><th>정탐률</th><th>상태</th></tr>
+            <tr><td>성명+식별정보 조합 규정</td><td>성명 + 주소·소속·직위 동시 출현</td><td>PII-AI v1.3</td><td>전 채널</td><td>96.4%</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>건강·의료정보 규정</td><td>병명·처방·진료기록 서술 문맥</td><td>PII-AI v1.3</td><td>AI Monitor · LLM Proxy</td><td>93.1%</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>인사·급여정보 규정</td><td>평가등급·연봉·징계 서술 문맥</td><td>PII-AI v1.3</td><td>PC Proxy · LLM Proxy</td><td>94.8%</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>비정형 주소·위치 규정</td><td>자연어 주소·거주지 추정 표현</td><td>PII-AI v1.4-beta</td><td>-</td><td>91.2%</td><td><span class="pill p-info">검증 중</span></td></tr>
+          </table>
+          <div class="note">정규식으로 못 잡는 서술형 개인정보를 AI가 문맥으로 탐지 — 미적용 단말 24대 (대시보드 ⑧ 연동)</div>
+          <div class="actions"><button class="btn ghost">+ 규정 추가</button><button class="btn">선택 규정 배포</button></div>
+        </div>
+      </div>
+
+      <div class="tabc" id="sm-2">
+        <div class="card">
+          <h3>대외비 AI 검사 규정 <span class="ref">AI 판정 — 대외비·기밀 문맥 탐지</span></h3>
+          <table>
+            <tr><th>규정</th><th>판정 기준</th><th>판정 모델</th><th>배포 대상</th><th>금주 탐지</th><th>상태</th></tr>
+            <tr><td>기밀정보 문맥 규정</td><td>프로젝트 코드명·미공개 전략·도면 설명 문맥</td><td>Conf-AI v1.0</td><td>AI Monitor · PC Proxy</td><td>14</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>경영·영업비밀 규정</td><td>계약 조건·단가·M&amp;A 등 미공개 경영정보 문맥</td><td>Conf-AI v1.0</td><td>전 채널</td><td>5</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>소스코드 유출 규정</td><td>내부 저장소 코드 시그니처·독자 알고리즘</td><td>Code-AI v0.9</td><td>PC Proxy · LLM Proxy</td><td>3</td><td><span class="pill p-warn">배포 대기</span></td></tr>
+          </table>
+          <div class="note">정규식(1차) → 개인정보 AI(2차) → 대외비 AI(3차) 다층 검사. 판정 근거는 로그에 기록되어 통합 검색에서 확인할 수 있습니다.</div>
+          <div class="actions"><button class="btn ghost">+ 규정 추가</button><button class="btn">선택 규정 배포</button></div>
+        </div>
+      </div>
+
+      <div class="tabc" id="sm-3">
+        <div class="card">
+          <h3>CSO등급 검사 규정 <span class="ref">문서 보안등급(CSO 등급) 기반 통제</span></h3>
+          <table>
+            <tr><th>규정</th><th>대상 등급 / 라벨</th><th>처리</th><th>배포 대상</th><th>상태</th></tr>
+            <tr><td>1등급(극비) 차단 규정</td><td>CSO 1등급 · DRM 극비 라벨</td><td><span class="pill p-bad">전 채널 차단</span></td><td>전 채널</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>2등급(대외비) 승인 규정</td><td>CSO 2등급 · 대외비 라벨</td><td><span class="pill p-warn">승인 후 허용</span></td><td>PC Proxy · Remote Web Proxy</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>3등급(일반) 로깅 규정</td><td>CSO 3등급 이하</td><td><span class="pill p-dim">허용 + 로깅</span></td><td>전 채널</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>등급 미지정 문서 규정</td><td>분류라벨 없음</td><td><span class="pill p-info">개인정보·대외비 AI 검사로 전환</span></td><td>전 채널</td><td><span class="pill p-warn">배포 대기</span></td></tr>
+          </table>
+          <div class="note">첨부·전송 문서의 분류라벨·DRM 등급을 판독하여 등급별 처리 정책을 적용합니다.</div>
+          <div class="actions"><button class="btn ghost">+ 규정 추가</button><button class="btn">선택 규정 배포</button></div>
+        </div>
+      </div>
+
+      <div class="tabc" id="sm-4">
+        <div class="card">
+          <h3>LLM결과 검사 규정 <span class="ref">LLM 응답(결과) 검사 — 응답 경유 유출 통제</span></h3>
+          <table>
+            <tr><th>규정</th><th>검사 대상</th><th>처리</th><th>배포 대상</th><th>상태</th></tr>
+            <tr><td>응답 개인정보 마스킹 규정</td><td>AI 응답 내 개인정보 (재조합 포함)</td><td><span class="pill p-info">마스킹 후 표시</span></td><td>AI Monitor · LLM Proxy</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>응답 대외비 차단 규정</td><td>응답 내 기밀·대외비 문맥</td><td><span class="pill p-bad">차단</span></td><td>LLM Proxy</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>응답 소스코드 검사 규정</td><td>내부 코드 시그니처 포함 응답</td><td><span class="pill p-warn">경고 + 로깅</span></td><td>PC Proxy · LLM Proxy</td><td><span class="pill p-warn">배포 대기</span></td></tr>
+            <tr><td>응답 유해성 규정</td><td>편향·유해·환각 고위험 표현</td><td><span class="pill p-warn">경고</span></td><td>-</td><td><span class="pill p-info">검증 중</span></td></tr>
+          </table>
+          <div class="note">입력(프롬프트)뿐 아니라 LLM 응답(결과)을 통한 정보 유출을 검사 — RAG·내부 연동 App의 응답 경로 통제에 적용됩니다.</div>
+          <div class="actions"><button class="btn ghost">+ 규정 추가</button><button class="btn">선택 규정 배포</button></div>
+        </div>
+      </div>
+
+      <div class="tabc" id="sm-5">
+        <div class="card">
+          <h3>이상행위 검사 규정 <span class="ref">사용 행위 패턴 분석 — 위험 점수 산출</span></h3>
+          <table>
+            <tr><th>규정</th><th>탐지 조건</th><th>위험점수 가중치</th><th>적용 범위</th><th>상태</th></tr>
+            <tr><td>심야 사용 규정</td><td>22~06시 사용량이 부서 평균 3배 이상</td><td>+10</td><td>전 채널</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>대량 전송 규정</td><td>10,000자 이상/시간 또는 파일 20건 이상/일</td><td>+15</td><td>AI 모니터 · PC Proxy</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>반복 위반 규정</td><td>동일 유형 정책 위반 3회 이상/주</td><td>+20</td><td>전 채널</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>정책 우회 규정</td><td>프록시 변경·미승인 경로 접속 시도</td><td>+25</td><td>AI 모니터 · Remote Web Proxy</td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>Agent 과다 호출 규정</td><td>도구 호출 50회 이상/10분</td><td>+15</td><td>PC Proxy</td><td><span class="pill p-warn">배포 대기</span></td></tr>
+          </table>
+          <div class="note">탐지 결과는 통합 모니터링의 이상행위 상관분석과 위험 사용자 스코어에 반영됩니다.</div>
+          <div class="actions"><button class="btn ghost">+ 규정 추가</button><button class="btn">선택 규정 배포</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AI 모니터 ============ -->
+    <section class="page" id="p-ndr">
+      <h2>AI 모니터 <span class="pill p-info">제품정책관리</span></h2>
+      <div class="sub">AI 전송 트래픽 모니터링 · Shadow AI 탐지 — 정책 관리</div>
+      <div class="tabc on" id="ndr-0">
+        <div class="card">
+          <h3>기 설정 정책 — 프롬프트 수집</h3>
+          <table>
+            <tr><th>대상 서비스</th><th>수집 범위</th><th>검사 규정 (SM 연동)</th><th>수집</th></tr>
+            <tr><td>ChatGPT Web + App (codex 포함)</td><td>프롬프트 + 응답</td><td>정규식 v2.1 · 대외비 AI v1.0</td><td><div class="toggle on"></div></td></tr>
+            <tr><td>Claude Web + App</td><td>프롬프트 + 응답</td><td>정규식 v2.1 · 대외비 AI v1.0</td><td><div class="toggle on"></div></td></tr>
+            <tr><td>Gemini Web + App (Antigravity)</td><td>프롬프트</td><td>정규식 v2.1 · 개인정보 AI v1.3</td><td><div class="toggle on"></div></td></tr>
+            <tr><td>Office Copilot (Outlook·PPT·Word·Excel)</td><td>프롬프트</td><td>정규식 v2.1</td><td><div class="toggle on"></div></td></tr>
+            <tr><td>Copilot App</td><td>프롬프트 + 응답</td><td>정규식 v2.1</td><td><div class="toggle"></div></td></tr>
+          </table>
+          <div class="actions"><button class="btn ghost" onclick="openNDR()">+ 정책 추가</button><button class="btn">정책 저장</button></div>
+        </div>
+      </div>
+      <div class="tabc" id="ndr-1">
+        <div class="card">
+          <h3>기 설정 정책 — Shadow AI 탐지</h3>
+          <div class="frow"><label>JSON 키 사용 패턴 탐지</label><div class="toggle on"></div><span class="note" style="margin:0">messages / prompt / model 등 LLM API 특유 키 구조 분석</span></div>
+          <div class="frow"><label>HTTP 헤더 시그니처 탐지</label><div class="toggle on"></div><span class="note" style="margin:0">SSE, API Key 헤더 등 시그니처 기반</span></div>
+          <div class="frow"><label>탐지 민감도</label><select><option>높음</option><option selected>중간</option><option>낮음</option></select></div>
+          <div class="frow"><label>탐지 시 처리</label><select><option selected>기록 + 관리자 알림</option><option>기록만</option></select></div>
+          <div class="actions"><button class="btn ghost">+ 정책 추가</button><button class="btn">정책 저장</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PC Proxy ============ -->
+    <section class="page" id="p-pp">
+      <h2>PC Proxy <span class="pill p-info">제품정책관리</span></h2>
+      <div class="sub">단말 설치형 AI Agent 통제 — 정책 · 설치 · 예외 관리</div>
+      <div class="tabc on" id="pp-0">
+        <div class="card">
+          <h3>기 설정 규정 목록</h3>
+          <table>
+            <tr><th>규정</th><th>사용가능 AI 서비스</th><th>전송 제한</th><th>파일첨부</th><th>검사 규정 (SM)</th><th>상태</th></tr>
+            <tr><td>연구소 표준 규정</td><td>ChatGPT App · Claude App · codex</td><td>5,000자</td><td>.txt .md .py · DRM 3등급↓</td><td>정규식 + 개인정보 AI + 대외비 AI</td><td><span class="pill p-ok">사용 중</span></td></tr>
+            <tr><td>Staff 규정</td><td>ChatGPT Web</td><td>3,000자</td><td>첨부 차단</td><td>정규식 + 개인정보 AI</td><td><span class="pill p-ok">사용 중</span></td></tr>
+            <tr><td>일반 규정</td><td>승인 서비스 전체</td><td>8,000자</td><td>.txt .docx</td><td>정규식</td><td><span class="pill p-ok">사용 중</span></td></tr>
+            <tr><td>개발자 규정</td><td>codex · Claude App</td><td>10,000자</td><td>소스 확장자 허용</td><td>정규식 + 대외비 AI</td><td><span class="pill p-warn">배포 대기</span></td></tr>
+          </table>
+          <div class="actions"><button class="btn ghost" onclick="openPP()">+ 정책 추가</button><button class="btn">규정 편집</button></div>
+          <div class="note">DRM 문서·CSO 분류문서는 규정에 따라 자동 복호화 후 검사합니다.</div>
+        </div>
+        <div class="card mt">
+          <h3>부서·사용자별 배포 정책</h3>
+          <table>
+            <tr><th>대상</th><th>적용 규정</th><th>후처리</th><th>상태</th></tr>
+            <tr><td>연구소 (214명)</td><td>연구소 표준 규정</td><td><span class="pill p-bad">차단</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>재무·HR (88명)</td><td>Staff 규정</td><td><span class="pill p-warn">경고</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>사업부 (302명)</td><td>일반 규정</td><td><span class="pill p-dim">로깅</span></td><td><span class="pill p-ok">배포됨</span></td></tr>
+            <tr><td>개발본부 (486명)</td><td>개발자 규정 (codex 허용)</td><td><span class="pill p-warn">경고</span></td><td><span class="pill p-warn">배포 대기</span></td></tr>
+          </table>
+          <div class="note">차단은 제한적으로 적용 — 기본은 경고/로깅 후 반복 위반 시 차단 전환을 권장.</div>
+          <div class="actions"><button class="btn">정책 배포</button></div>
+        </div>
+      </div>
+      <div class="tabc" id="pp-1">
+        <div class="card">
+          <h3>설치 현황</h3>
+          <div class="grid g3">
+            <div class="card kpi" style="background:var(--panel2)"><div class="lbl">설치 완료</div><div class="val">1,102</div></div>
+            <div class="card kpi" style="background:var(--panel2)"><div class="lbl">미설치</div><div class="val" style="color:var(--warn)">182</div></div>
+            <div class="card kpi" style="background:var(--panel2)"><div class="lbl">로그인 사용자</div><div class="val">976</div></div>
+          </div>
+          <table class="mt">
+            <tr><th>사용자</th><th>부서</th><th>설치</th><th>로그인</th><th>적용 정책</th></tr>
+            <tr><td>김민준</td><td>연구소</td><td><span class="pill p-ok">설치</span></td><td><span class="pill p-ok">로그인</span></td><td>연구소 표준</td></tr>
+            <tr><td>박지훈</td><td>사업부</td><td><span class="pill p-ok">설치</span></td><td><span class="pill p-warn">미로그인</span></td><td>일반</td></tr>
+            <tr><td>한지우</td><td>HR</td><td><span class="pill p-bad">미설치</span></td><td>-</td><td>-</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="tabc" id="pp-2">
+        <div class="card">
+          <h3>예외 신청 처리</h3>
+          <table>
+            <tr><th>신청자</th><th>유형</th><th>내용</th><th>기간</th><th>처리</th></tr>
+            <tr><td>최도윤 (개발)</td><td>키워드 예외</td><td>"고객사 A 프로젝트" 키워드 허용</td><td>07-01 ~ 07-15</td><td><button class="btn" style="padding:4px 12px">승인</button> <button class="btn ghost" style="padding:4px 12px">반려</button></td></tr>
+            <tr><td>이서연 (재무)</td><td>시간대 예외</td><td>결산기간 야간(22~24시) 사용</td><td>07-05 ~ 07-10</td><td><button class="btn" style="padding:4px 12px">승인</button> <button class="btn ghost" style="padding:4px 12px">반려</button></td></tr>
+            <tr><td>정하늘 (연구소)</td><td>키워드 예외</td><td>논문 초록 검토용 예외</td><td>승인됨</td><td><span class="pill p-ok">승인 완료</span></td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Remote Web Proxy ============ -->
+    <section class="page" id="p-rbi">
+      <h2>Remote Web Proxy <span class="pill p-info">제품정책관리</span></h2>
+      <div class="sub">외부 AI 웹서비스 원격 격리 채널 — 정책 관리</div>
+      <div class="tabc on" id="rwp-0">
+        <div class="card">
+          <h3>기 설정 정책 — 격리 대상 서비스</h3>
+          <table>
+            <tr><th>AI 서비스</th><th>접근 그룹</th><th>격리 사용</th></tr>
+            <tr><td>chatgpt.com</td><td>전사</td><td><div class="toggle on"></div></td></tr>
+            <tr><td>gemini.google.com</td><td>전사</td><td><div class="toggle on"></div></td></tr>
+            <tr><td>claude.ai</td><td>연구소 · 개발</td><td><div class="toggle on"></div></td></tr>
+            <tr><td>미분류 AI 서비스 (Shadow AI 연동)</td><td>차단</td><td><div class="toggle"></div></td></tr>
+          </table>
+          <div class="actions"><button class="btn ghost">+ 정책 추가</button><button class="btn">정책 저장</button></div>
+        </div>
+      </div>
+      <div class="tabc" id="rwp-1">
+        <div class="card">
+          <h3>설정 — 세션 전송 제한</h3>
+          <div class="frow"><label>파일 업로드</label><select style="flex:1"><option selected>민감정보 검사 후 허용 (SM 규정)</option><option>전체 차단</option></select></div>
+          <div class="frow"><label>파일 다운로드</label><select style="flex:1"><option selected>차단</option><option>허용</option></select></div>
+          <div class="frow"><label>클립보드 복사/붙여넣기</label><select style="flex:1"><option selected>붙여넣기만 허용</option><option>양방향 허용</option><option>전체 차단</option></select></div>
+          <div class="frow"><label>세션 녹화(감사용)</label><div class="toggle on"></div></div>
+          <div class="actions"><button class="btn">저장</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LLM Proxy ============ -->
+    <section class="page" id="p-lp">
+      <h2>LLM Proxy <span class="pill p-info">제품정책관리</span></h2>
+      <div class="sub">외부 LLM API 통제 — 기본 정책 · 신청/승인 · Provider · 비용 · 장애 전환</div>
+                <div class="tabc on" id="lp-0">
+            <div class="card">
+              <h3>기 설정 정책 — 기본 정책 (AI 서비스별) <span class="ref">사용자 · 사용 모델 · 사용량 · 적용 규정</span></h3>
+              <table id="lpSvcTable">
+                <tr><th>AI 서비스 (App)</th><th>사용자 (그룹)</th><th>사용 모델</th><th>사용량 — RPM / TPM</th><th>월 예산</th><th>적용 규정 (SM)</th><th>상태</th></tr>
+                <tr>
+                  <td>Wrapsody AI</td>
+                  <td>전사</td>
+                  <td>gpt-4o · claude-sonnet-5</td>
+                  <td>60 / 400,000</td>
+                  <td>$2,800</td>
+                  <td>정규식 v2.1 + 개인정보 AI v1.3</td>
+                  <td><span class="pill p-ok">적용됨</span></td>
+                </tr>
+                <tr>
+                  <td>뉴스클리핑</td>
+                  <td>사업부 · 연구소</td>
+                  <td>gemini-2.5-pro</td>
+                  <td>40 / 200,000</td>
+                  <td>$1,200</td>
+                  <td>정규식 v2.1</td>
+                  <td><span class="pill p-ok">적용됨</span></td>
+                </tr>
+                <tr>
+                  <td>테스트 자동화</td>
+                  <td>개발본부</td>
+                  <td>claude-sonnet-5 · o3</td>
+                  <td>20 / 100,000</td>
+                  <td>$520</td>
+                  <td>정규식 v2.1 + 대외비 AI v1.0</td>
+                  <td><span class="pill p-warn">배포 대기</span></td>
+                </tr>
+              </table>
+              <div class="note">그룹 외 사용자의 호출은 차단됩니다. 사용량(RPM/TPM)·월 예산 초과 시 알림 → 호출 제한 → Key 중지 순으로 처리 (비용·한도 관리 탭 연동).</div>
+              <div class="frow mt"><label>LLM결과 검사 (SM) — 공통</label><select><option selected>응답 개인정보 마스킹 + 대외비 차단</option><option>응답 개인정보 마스킹만</option><option>미적용</option></select></div>
+              <div class="frow"><label>요청·응답 로깅 — 공통</label><div class="toggle on"></div></div>
+              <div class="actions"><button class="btn ghost" onclick="openLPSvc()">+ 서비스 추가</button><button class="btn">정책 배포</button></div>
+            </div>
+          </div>
+          <div class="tabc" id="lp-1">
+            <div class="card">
+              <h3>API 사용 신청 접수</h3>
+              <table>
+                <tr><th>Application</th><th>신청자</th><th>목적 / 모델</th><th>데이터 유형</th><th>예상 호출량</th><th>월 예상 비용</th><th>기간</th><th>상태</th></tr>
+                <tr><td>HR-Chatbot</td><td>최도윤</td><td>사내 인사규정 Q&amp;A / claude-sonnet-5</td><td>내부 규정 문서</td><td>20K/월</td><td>$300</td><td>~12-31</td><td><span class="pill p-info">접수됨</span></td></tr>
+                <tr><td>Doc-Summarizer</td><td>강태오</td><td>보고서 요약 / gpt-4o</td><td>업무 보고서</td><td>40K/월</td><td>$520</td><td>~09-30</td><td><span class="pill p-warn">보안 검토 중</span></td></tr>
+                <tr><td>Meeting-Notes</td><td>윤소민</td><td>회의록 정리 / gemini-2.5-pro</td><td>회의 녹취 텍스트</td><td>12K/월</td><td>$180</td><td>작성 중</td><td><span class="pill p-dim">임시 저장</span></td></tr>
+              </table>
+              <div class="note">개발자가 App 정보·목적·모델·데이터 유형·예상 호출량·월 예상 비용·기간을 등록해 신청합니다.</div>
+              <div class="actions"><button class="btn">+ 새 신청 등록</button></div>
+            </div>
+          </div>
+          <div class="tabc" id="lp-2">
+            <div class="card">
+              <h3>사용 승인 관리</h3>
+              <table>
+                <tr><th>Application</th><th>검토 항목</th><th>개발관리자</th><th>AI 보안 관리자</th><th>처리</th></tr>
+                <tr><td>HR-Chatbot</td><td>목적·비용 / 데이터 위험</td><td><span class="pill p-ok">검토 완료</span></td><td><span class="pill p-warn">검토 중</span></td><td><button class="btn" style="padding:4px 12px">승인</button> <button class="btn ghost" style="padding:4px 12px">보완요청</button> <button class="btn ghost" style="padding:4px 12px">반려</button></td></tr>
+                <tr><td>Doc-Summarizer</td><td>목적·비용 / 데이터 위험</td><td><span class="pill p-ok">검토 완료</span></td><td><span class="pill p-warn">검토 중</span></td><td><button class="btn" style="padding:4px 12px">승인</button> <button class="btn ghost" style="padding:4px 12px">보완요청</button></td></tr>
+                <tr><td>ERP-Assist</td><td>-</td><td><span class="pill p-ok">승인</span></td><td><span class="pill p-ok">승인</span></td><td><span class="pill p-ok">승인 · Key 발급됨</span></td></tr>
+                <tr><td>CS-Bot</td><td>-</td><td><span class="pill p-ok">승인</span></td><td><span class="pill p-ok">승인</span></td><td><span class="pill p-ok">승인 · Key 발급됨</span></td></tr>
+              </table>
+              <div class="note">승인 시 월 예산·호출 한도(RPM/TPM)·사용 기간을 지정 → 시스템 운영자가 환경 준비 후 플랫폼 API Key 발급.</div>
+            </div>
+          </div>
+          <div class="tabc" id="lp-3">
+            <div class="card">
+              <h3>Provider 연결 관리</h3>
+              <table>
+                <tr><th>Provider</th><th>계정·키 등록</th><th>연결</th><th>오류율</th><th>라우팅</th></tr>
+                <tr><td>OpenAI</td><td><span class="pill p-ok">비밀 저장소 등록</span></td><td><span class="pill p-ok">정상</span></td><td>0.2%</td><td>기본</td></tr>
+                <tr><td>Anthropic</td><td><span class="pill p-ok">비밀 저장소 등록</span></td><td><span class="pill p-ok">정상</span></td><td>0.1%</td><td>기본</td></tr>
+                <tr><td>Google</td><td><span class="pill p-ok">비밀 저장소 등록</span></td><td><span class="pill p-warn">지연 ↑</span></td><td>1.8%</td><td>리전 분산</td></tr>
+                <tr><td>Azure OpenAI</td><td><span class="pill p-dim">예비 (장애 전환용)</span></td><td><span class="pill p-ok">정상</span></td><td>0.3%</td><td>대기</td></tr>
+              </table>
+            </div>
+            <div class="card mt">
+              <h3>플랫폼 API Key 발급 현황</h3>
+              <table>
+                <tr><th>Application</th><th>Key</th><th>발급일</th><th>만료</th><th>상태</th></tr>
+                <tr><td>ERP-Assist</td><td>airo-****-7f2a</td><td>2026-03-02</td><td>2026-12-31</td><td><span class="pill p-ok">활성</span></td></tr>
+                <tr><td>CS-Bot</td><td>airo-****-b91c</td><td>2026-04-15</td><td>2026-12-31</td><td><span class="pill p-ok">활성</span></td></tr>
+                <tr><td>Legacy-Bot</td><td>airo-****-03d8</td><td>2025-11-01</td><td>2026-06-30</td><td><span class="pill p-bad">폐기됨</span></td></tr>
+              </table>
+              <div class="actions"><button class="btn ghost">Key 재발급</button><button class="btn">신규 Key 발급</button></div>
+            </div>
+          </div>
+          <div class="tabc" id="lp-4">
+            <div class="card">
+              <h3>App별 비용 · 한도 (당월)</h3>
+              <table>
+                <tr><th>Application</th><th>모델</th><th>호출/토큰</th><th>비용 / 예산</th><th>RPM/TPM</th><th>상태</th></tr>
+                <tr><td>CS-Bot</td><td>claude-sonnet-5</td><td>184K / 92M tok</td><td>$2,340 / $2,800 (84%)</td><td>60 / 400K</td><td><span class="pill p-warn">예산 임박</span></td></tr>
+                <tr><td>ERP-Assist</td><td>gpt-4o</td><td>96K / 41M tok</td><td>$980 / $1,200 (82%)</td><td>40 / 200K</td><td><span class="pill p-warn">알림 발송</span></td></tr>
+                <tr><td>Doc-Summarizer</td><td>gpt-4o</td><td>22K / 18M tok</td><td>$310 / $520 (60%)</td><td>20 / 100K</td><td><span class="pill p-ok">정상</span></td></tr>
+                <tr><td>Legacy-Bot (만료)</td><td>-</td><td>-</td><td>-</td><td>-</td><td><span class="pill p-bad">Key 폐기됨</span></td></tr>
+              </table>
+              <div class="note">한도 초과 시 알림·호출 제한·Key 중지 순으로 처리. 기간 만료 App의 Key는 폐기됩니다.</div>
+            </div>
+          </div>
+          <div class="tabc" id="lp-5">
+            <div class="card">
+              <h3>기 설정 정책 — 장애 전환</h3>
+              <table>
+                <tr><th>Provider</th><th>전환 조건</th><th>전환 대상</th><th>상태</th></tr>
+                <tr><td>OpenAI</td><td>오류율 5%↑ 또는 타임아웃 3연속</td><td>→ Azure OpenAI (gpt-4o)</td><td><span class="pill p-ok">활성</span></td></tr>
+                <tr><td>Anthropic</td><td>오류율 5%↑</td><td>→ AWS Bedrock (claude)</td><td><span class="pill p-ok">활성</span></td></tr>
+                <tr><td>Google</td><td>지연 2s↑ 지속</td><td>→ Vertex AI 리전 전환</td><td><span class="pill p-ok">활성</span></td></tr>
+              </table>
+              <div class="frow mt"><label>한도초과·장애 시 자동 전환</label><div class="toggle on"></div></div>
+              <div class="frow"><label>타임아웃 (요청당)</label><input type="number" value="30" style="width:90px"> 초</div>
+              <div class="frow"><label>알림 수신 담당자</label><input type="text" value="ops-team@fasoo.com" style="flex:1"></div>
+              <div class="actions"><button class="btn">저장</button></div>
+            </div>
+          </div>
+    </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ 운영보고서 생성 모달 (4단계 위저드) ============ -->
+<div class="overlay" id="reportModal">
+  <div class="modal">
+    <h2>운영보고서 생성 <span class="ref">정기 분석 · 자체점검 체크리스트</span><span class="x" onclick="closeReport()">✕</span></h2>
+    <div class="wiz" id="wiz">
+      <span class="on">① 유형 선택</span><span>② 범위 설정</span><span>③ 구성 선택</span><span>④ 미리보기·배포</span>
+    </div>
+
+    <div class="wstep on" id="w-0">
+      <div class="radio sel"><input type="radio" name="rt" checked><div><b>정기 운영보고서 (주간/월간/분기)</b><small>로그 기록 및 정기 분석 의무 대응 — 사용량·위반·차단·비용 정기 요약</small></div></div>
+      <div class="radio"><input type="radio" name="rt"><div><b>AI보안 체크리스트 준수 보고서</b><small>가이드북 자체점검 체크리스트 매핑 — 보안성검토·감사 수검 자료로 즉시 활용</small></div></div>
+      <div class="radio"><input type="radio" name="rt"><div><b>사고 대응 보고서 (이벤트/기간 지정형)</b><small>사후 원인 분석 — 통합 검색 결과에서 원클릭 전환 지원</small></div></div>
+      <div class="radio"><input type="radio" name="rt"><div><b>경영진 요약 보고서 (1p Executive Summary)</b><small>기관장·CISO가 인지 가능한 형태의 1페이지 요약</small></div></div>
+      <div class="actions"><button class="btn" onclick="wgo(1)">다음 →</button></div>
+    </div>
+
+    <div class="wstep" id="w-1">
+      <div class="frow"><label>기간</label><select style="flex:1"><option selected>2026-06-01 ~ 2026-06-30 (월간)</option><option>최근 1주</option><option>분기 (2026 Q2)</option><option>직접 지정…</option></select></div>
+      <div class="frow"><label>조직</label><select style="flex:1"><option selected>전사</option><option>연구소</option><option>사업부</option><option>개발본부</option></select></div>
+      <div class="frow"><label>하위 제품</label><div class="chips"><span class="chip sel">AI 모니터</span><span class="chip sel">PC Proxy</span><span class="chip sel">Remote Web Proxy</span><span class="chip sel">LLM Proxy</span></div></div>
+      <div class="frow"><label>AI 서비스 / App</label><select style="flex:1"><option selected>전체 (Shadow AI 포함)</option><option>승인 서비스만</option></select></div>
+      <div class="actions"><button class="btn ghost" onclick="wgo(0)">← 이전</button><button class="btn" onclick="wgo(2)">다음 →</button></div>
+    </div>
+
+    <div class="wstep" id="w-2">
+      <div class="ckgrid">
+        <div class="ck sel"><i>✓</i>요약 KPI (사용량·위반·차단·비용)</div>
+        <div class="ck sel"><i>✓</i>민감정보 탐지 상세</div>
+        <div class="ck sel"><i>✓</i>Shadow AI 현황</div>
+        <div class="ck sel"><i>✓</i>위험 사용자·이상행위</div>
+        <div class="ck sel"><i>✓</i>정책 변경 이력</div>
+        <div class="ck sel"><i>✓</i>시정조치 이행 현황</div>
+        <div class="ck"><i></i>LLM API 비용 분석</div>
+        <div class="ck"><i></i>자체점검 체크리스트 대응표</div>
+        <div class="ck"><i></i>원본 이벤트 부록</div>
+      </div>
+      <div class="note">구축유형(내부망 전용 ~ 상용 AI)별로 중점 대책이 달라 기관마다 보고 항목이 다름 — 조립형 구성</div>
+      <div class="actions"><button class="btn ghost" onclick="wgo(1)">← 이전</button><button class="btn" onclick="wgo(3)">다음 →</button></div>
+    </div>
+
+    <div class="wstep" id="w-3">
+      <div class="preview">
+        <b style="color:var(--txt)">📄 2026년 6월 정기 운영보고서 (미리보기)</b><br>
+        Ⅰ. 요약 KPI — AI 사용자 1,284 · 정책 위반 47 (▲12) · 차단 31 · 비용 $8,420<br>
+        Ⅱ. 민감정보 탐지 상세 — 유형별/부서별/채널별 · 처리 결과 비율<br>
+        Ⅲ. Shadow AI 현황 — 신규 3건 · 조치 이력 &nbsp;Ⅳ. 위험 사용자·이상행위<br>
+        Ⅴ. 정책 변경 이력 &nbsp;Ⅵ. 시정조치 이행 현황
+      </div>
+      <div class="frow mt"><label>출력 형식</label><div class="chips"><span class="chip sel">PDF</span><span class="chip">DOCX</span></div></div>
+      <div class="frow"><label>결재선 지정</label><input type="text" value="AI 보안 관리자 → CISO → 기관장" style="flex:1"></div>
+      <div class="frow"><label>수신자 (메일)</label><input type="text" value="ciso@fasoo.com; sec-ops@fasoo.com" style="flex:1"></div>
+      <div class="frow"><label>정기 자동 생성</label><div class="toggle on"></div><span class="note" style="margin:0">매주 월 09:00 — 정기 분석 자동화</span></div>
+      <div class="actions"><button class="btn ghost" onclick="wgo(2)">← 이전</button><button class="btn ghost">미리보기</button><button class="btn" onclick="closeReport()">생성</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ AI 모니터 프롬프트 수집 정책 추가 모달 ============ -->
+<div class="overlay" id="ndrModal">
+  <div class="modal">
+    <h2>프롬프트 수집 정책 추가 <span class="ref">AI 모니터 — 수집 대상 · 범위 · 검사 규정</span><span class="x" onclick="closeNDR()">✕</span></h2>
+    <div class="frow"><label>정책 이름 *</label><input type="text" value="Copilot App 수집 정책" style="flex:1"></div>
+    <div class="frow"><label>대상 AI 서비스</label><select style="flex:1"><option selected>Copilot App</option><option>ChatGPT Web + App (codex 포함)</option><option>Claude Web + App</option><option>Gemini Web + App (Antigravity)</option><option>Office Copilot (Outlook·PPT·Word·Excel)</option><option>+ 신규 서비스 직접 등록 (URL·시그니처)</option></select></div>
+    <div class="frow"><label>수집 채널</label><div class="chips"><span class="chip sel">Web</span><span class="chip sel">App</span></div></div>
+    <div class="frow" style="align-items:flex-start"><label style="padding-top:11px">수집 범위</label>
+      <div style="flex:1">
+        <div class="radio sel"><input type="radio" name="ndrscope" checked><div><b>프롬프트 + 응답</b><small>전송 프롬프트와 AI 응답 내용을 모두 수집 — 유출 검사·감사 추적에 권장</small></div></div>
+        <div class="radio"><input type="radio" name="ndrscope"><div><b>프롬프트만</b><small>사용자 입력만 수집 — 저장 용량·프라이버시 부담 완화</small></div></div>
+        <div class="radio"><input type="radio" name="ndrscope"><div><b>메타데이터만</b><small>서비스·시각·전송량만 기록, 원문 미수집 — 사용 현황 파악용</small></div></div>
+      </div>
+    </div>
+    <div class="frow" style="align-items:flex-start"><label style="padding-top:6px">검사 규정 (SM 연동)</label>
+      <div class="ckgrid" style="flex:1">
+        <div class="ck sel"><i>✓</i>정규식 검사 v2.1</div>
+        <div class="ck sel"><i>✓</i>개인정보 AI 검사 v1.3</div>
+        <div class="ck"><i></i>대외비 AI 검사 v1.0</div>
+        <div class="ck"><i></i>LLM결과 검사 v0.9 (응답 수집 시)</div>
+      </div>
+    </div>
+    <div class="frow"><label>원문 저장 방식</label><select style="flex:1"><option selected>민감정보 마스킹 후 저장 — 원문 열람은 승인 필요</option><option>원문 저장 (열람 권한 정책 적용)</option><option>메타데이터만 저장</option></select></div>
+    <div class="frow"><label>보존 기간</label><select><option>90일</option><option selected>180일</option><option>365일</option></select></div>
+    <div class="frow"><label>Shadow AI 탐지 연동</label><div class="toggle on"></div><span class="note" style="margin:0">미등록 URL 중 AI 추정 요청(JSON 키 패턴·헤더 시그니처)을 함께 기록</span></div>
+    <div class="frow"><label>수집 활성화</label><div class="toggle on"></div></div>
+    <div class="actions"><button class="btn ghost" onclick="closeNDR()">취소</button><button class="btn" onclick="closeNDR()">정책 저장</button></div>
+  </div>
+</div>
+
+<!-- ============ LLM Proxy 서비스 추가 모달 ============ -->
+<div class="overlay" id="lpSvcModal">
+  <div class="modal">
+    <h2>LLM Proxy — 서비스 추가 <span class="ref">사용자 · 사용 모델 · 사용량 · 적용 규정 설정</span><span class="x" onclick="closeLPSvc()">✕</span></h2>
+    <div class="frow"><label>AI 서비스 (App) 이름 *</label><input type="text" id="lpSvcName" placeholder="예: 회의록 요약" value="회의록 요약" style="flex:1"></div>
+    <div class="frow"><label>설명</label><input type="text" placeholder="서비스 목적·용도" value="회의 녹취 텍스트 요약·정리" style="flex:1"></div>
+    <div class="frow"><label>사용자 (그룹)</label><select id="lpSvcGroup" style="flex:1"><option selected>전사</option><option>연구소</option><option>재무·HR</option><option>사업부</option><option>개발본부</option><option>연구소 · 개발본부</option></select></div>
+    <div class="frow"><label>사용 모델</label><div class="chips" id="lpSvcModels"><span class="chip sel">gpt-4o</span><span class="chip">claude-sonnet-5</span><span class="chip sel">gemini-2.5-pro</span><span class="chip">o3</span></div></div>
+    <div class="frow"><label>사용량 (RPM / TPM)</label><input type="number" id="lpSvcRpm" value="30" style="width:70px"> / <input type="number" id="lpSvcTpm" value="150000" style="width:100px"></div>
+    <div class="frow"><label>월 예산</label><input type="text" id="lpSvcBudget" value="$800" style="width:90px"><span class="note" style="margin:0">초과 시 알림 → 호출 제한 → Key 중지</span></div>
+    <div class="frow" style="align-items:flex-start"><label style="padding-top:6px">적용 규정 (SM)</label>
+      <div class="ckgrid" style="flex:1" id="lpSvcRules">
+        <div class="ck sel"><i>✓</i>정규식 v2.1</div>
+        <div class="ck sel"><i>✓</i>개인정보 AI v1.3</div>
+        <div class="ck"><i></i>대외비 AI v1.0</div>
+        <div class="ck"><i></i>LLM결과 검사 v0.9</div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="closeLPSvc()">취소</button><button class="btn" onclick="saveLPSvc()">저장 — 목록에 추가</button></div>
+  </div>
+</div>
+
+<!-- ============ PC Proxy 정책 추가 모달 (3단계 위저드) ============ -->
+<div class="overlay" id="ppModal">
+  <div class="modal">
+    <h2>PC Proxy — 정책 추가 <span class="ref">기본 정보 → 데이터 규정 → 후처리 정책</span><span class="x" onclick="closePP()">✕</span></h2>
+    <div class="wiz" id="ppwiz">
+      <span class="on">① 기본 정보</span><span>② 데이터 규정</span><span>③ 후처리 정책</span>
+    </div>
+
+    <!-- ① 기본 정보 : 이름 · 설명 · 대상자 · 대상 서비스 -->
+    <div class="ppstep on" id="pw-0">
+      <div class="frow"><label>정책 이름 *</label><input type="text" placeholder="예: 사업부 표준 규정" value="사업부 표준 규정" style="flex:1"></div>
+      <div class="frow"><label>설명</label><input type="text" placeholder="규정의 목적과 적용 배경" value="사업부 AI 사용 표준 통제 — 승인 서비스 한정, 첨부 제한" style="flex:1"></div>
+      <div class="frow"><label>대상자 (부서)</label><div class="chips"><span class="chip">연구소 (214명)</span><span class="chip">재무·HR (88명)</span><span class="chip sel">사업부 (302명)</span><span class="chip">개발본부 (486명)</span></div></div>
+      <div class="frow"><label>사용자 추가 지정</label><input type="text" placeholder="사용자·그룹 검색 (예: 박지훈)" style="flex:1"></div>
+      <h3 style="font-size:13px;margin:16px 0 10px">대상 서비스 (Web / App)</h3>
+      <table>
+        <tr><th>AI 서비스</th><th>Web</th><th>App (Agent)</th><th>비고</th></tr>
+        <tr><td>ChatGPT</td><td><div class="toggle on"></div></td><td><div class="toggle on"></div></td><td>App 허용 시 codex 포함</td></tr>
+        <tr><td>Claude</td><td><div class="toggle on"></div></td><td><div class="toggle"></div></td><td>-</td></tr>
+        <tr><td>Gemini</td><td><div class="toggle on"></div></td><td><div class="toggle"></div></td><td>App 허용 시 Antigravity 포함</td></tr>
+        <tr><td>Office Copilot</td><td>-</td><td><div class="toggle on"></div></td><td>Outlook · PPT · Word · Excel</td></tr>
+        <tr><td>Copilot App</td><td>-</td><td><div class="toggle"></div></td><td>-</td></tr>
+      </table>
+      <div class="note">미허용 서비스 접근 시 차단 후 안내 메시지 표시 · 미등록 서비스는 Shadow AI 탐지(AI 모니터)와 연동됩니다.</div>
+      <div class="actions"><button class="btn" onclick="ppgo(1)">다음 →</button></div>
+    </div>
+
+    <!-- ② 데이터 규정 : 전송데이터 · 첨부파일 · 검사 규정 -->
+    <div class="ppstep" id="pw-1">
+      <h3 style="font-size:13px;margin-bottom:10px">전송데이터 규정</h3>
+      <div class="frow"><label>프롬프트 최대 글자수</label><input type="number" value="5000" style="width:110px"> 자 / 요청</div>
+      <div class="frow"><label>AI 사용 시 로그인 필수</label><div class="toggle on"></div><span class="note" style="margin:0">미로그인 사용자는 AI 접근 차단 + 설치·로그인 유도 페이지 이동</span></div>
+      <h3 style="font-size:13px;margin:16px 0 10px">첨부파일 규정</h3>
+      <div class="frow"><label>파일 첨부 허용</label><div class="toggle on"></div></div>
+      <div class="frow"><label>허용 확장자</label><div class="chips"><span class="chip sel">.txt</span><span class="chip sel">.md</span><span class="chip sel">.docx</span><span class="chip">.xlsx</span><span class="chip">.pptx</span><span class="chip">.pdf</span><span class="chip">.py .js .java (소스)</span><span class="chip">+ 직접 입력</span></div></div>
+      <div class="frow"><label>분류라벨 (CSO 등급)</label><select style="flex:1"><option selected>3등급(일반) 이하 허용 · 2등급(대외비) 승인 후 허용 · 1등급(극비) 차단</option><option>3등급(일반) 이하만 허용</option><option>등급 무관 허용 (검사 규정만 적용)</option></select></div>
+      <div class="frow"><label>DRM 등급</label><select style="flex:1"><option selected>DRM 3등급 이하 허용</option><option>DRM 문서 전체 차단</option><option>등급 무관 허용</option></select></div>
+      <h3 style="font-size:13px;margin:16px 0 10px">검사 규정 <span class="ref">Security Manager 규정 연동</span></h3>
+      <div class="ckgrid">
+        <div class="ck sel"><i>✓</i>정규식 검사 v2.1 (주민번호·계좌·전화 등)</div>
+        <div class="ck sel"><i>✓</i>개인정보 AI 검사 v1.3 (문맥 기반)</div>
+        <div class="ck"><i></i>대외비 AI 검사 v1.0</div>
+        <div class="ck sel"><i>✓</i>CSO등급 검사 v1.0 (첨부 문서)</div>
+        <div class="ck"><i></i>LLM결과 검사 v0.9 (응답 검사 — 검증 중)</div>
+        <div class="ck"><i></i>이상행위 검사 v1.0 (위험점수 반영)</div>
+      </div>
+      <div class="note">검사 규정의 정의·버전 관리는 Security Manager에서 수행 — 여기서는 이 정책에 적용할 규정만 선택합니다.</div>
+      <div class="actions"><button class="btn ghost" onclick="ppgo(0)">← 이전</button><button class="btn" onclick="ppgo(2)">다음 →</button></div>
+    </div>
+
+    <!-- ③ 후처리 정책 -->
+    <div class="ppstep" id="pw-2">
+      <div class="frow" style="align-items:flex-start"><label style="padding-top:11px">후처리 정책</label>
+        <div style="flex:1">
+          <div class="radio"><input type="radio" name="pppost"><div><b>차단</b><small>위반 즉시 전송 차단 — 제한적으로 적용 권장</small></div></div>
+          <div class="radio sel"><input type="radio" name="pppost" checked><div><b>경고</b><small>사용자에게 메시지 표시 후 허용 · 위반 기록 — 반복 위반 시 차단 전환 권장</small></div></div>
+          <div class="radio"><input type="radio" name="pppost"><div><b>단순 로깅</b><small>개입 없이 기록만 — 정책 도입 초기 모니터링용</small></div></div>
+        </div>
+      </div>
+      <div class="frow"><label>예외 신청 허용</label><div class="toggle on"></div><span class="note" style="margin:0">사용자가 특정 키워드·시간대 예외를 신청 → 관리자 승인 (예외 신청 탭 연동)</span></div>
+      <div class="preview mt">
+        <b style="color:var(--txt)">📋 정책 요약 — 사업부 표준 규정</b><br>
+        대상: 사업부 302명 &nbsp;·&nbsp; 서비스: ChatGPT Web·App(codex) / Claude Web / Gemini Web / Office Copilot<br>
+        전송: 5,000자 / 요청 &nbsp;·&nbsp; 첨부: .txt .md .docx · CSO 3등급↓ · DRM 3등급↓<br>
+        검사: 정규식 v2.1 + 개인정보 AI v1.3 + CSO등급 v1.0<br>
+        후처리: <span style="color:var(--warn)">경고</span> &nbsp;·&nbsp; 예외 신청 허용
+      </div>
+      <div class="actions"><button class="btn ghost" onclick="ppgo(1)">← 이전</button><button class="btn ghost" onclick="closePP()">임시 저장</button><button class="btn" onclick="closePP()">정책 저장 + 배포</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function go(p){
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.p===p&&a.dataset.i===undefined));
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
+}
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+a.dataset.p));
+  document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('on'));a.classList.add('on');
+  if(a.dataset.i!==undefined){const k=a.dataset.t;document.querySelectorAll('[id^="'+k+'-"]').forEach(c=>c.classList.toggle('on',c.id===k+'-'+a.dataset.i));}
+}));
+/* sidebar collapsible product groups */
+document.querySelectorAll('.nav a.grp').forEach(a=>{
+  const g=document.getElementById('g-'+a.dataset.g);
+  a.querySelector('.caret').addEventListener('click',e=>{
+    e.stopPropagation();
+    a.classList.toggle('closed');g.classList.toggle('closed');
+  });
+  a.addEventListener('click',()=>{a.classList.remove('closed');g.classList.remove('closed');});
+});
+document.querySelectorAll('.tabs').forEach(t=>{
+  const key=t.dataset.t;
+  t.querySelectorAll('span').forEach((s,i)=>s.addEventListener('click',()=>{
+    t.querySelectorAll('span').forEach(x=>x.classList.remove('on'));s.classList.add('on');
+    document.querySelectorAll('[id^="'+key+'-"]').forEach(c=>c.classList.toggle('on',c.id===key+'-'+i));
+  }));
+});
+document.querySelectorAll('.toggle').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('on')));
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('sel')));
+document.querySelectorAll('.ck').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('sel');c.querySelector('i').textContent=c.classList.contains('sel')?'✓':'';}));
+document.querySelectorAll('.radio').forEach(r=>r.addEventListener('click',()=>{
+  r.parentNode.querySelectorAll('.radio').forEach(x=>{x.classList.remove('sel');x.querySelector('input').checked=false;});
+  r.classList.add('sel');r.querySelector('input').checked=true;
+}));
+/* report wizard */
+function openReport(){document.getElementById('reportModal').classList.add('on');wgo(0);}
+function closeReport(){document.getElementById('reportModal').classList.remove('on');}
+function wgo(n){
+  document.querySelectorAll('#wiz span').forEach((s,i)=>s.classList.toggle('on',i===n));
+  document.querySelectorAll('.wstep').forEach((w,i)=>w.classList.toggle('on',i===n));
+}
+document.querySelectorAll('#wiz span').forEach((s,i)=>s.addEventListener('click',()=>wgo(i)));
+document.getElementById('reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')closeReport();});
+/* AI Monitor collect-policy modal */
+function openNDR(){document.getElementById('ndrModal').classList.add('on');}
+function closeNDR(){document.getElementById('ndrModal').classList.remove('on');}
+document.getElementById('ndrModal').addEventListener('click',e=>{if(e.target.id==='ndrModal')closeNDR();});
+/* PC Proxy policy wizard */
+function openPP(){document.getElementById('ppModal').classList.add('on');ppgo(0);}
+function closePP(){document.getElementById('ppModal').classList.remove('on');}
+function ppgo(n){
+  document.querySelectorAll('#ppwiz span').forEach((s,i)=>s.classList.toggle('on',i===n));
+  document.querySelectorAll('.ppstep').forEach((w,i)=>w.classList.toggle('on',i===n));
+}
+document.querySelectorAll('#ppwiz span').forEach((s,i)=>s.addEventListener('click',()=>ppgo(i)));
+document.getElementById('ppModal').addEventListener('click',e=>{if(e.target.id==='ppModal')closePP();});
+/* LLM Proxy service-add modal */
+function openLPSvc(){document.getElementById('lpSvcModal').classList.add('on');}
+function closeLPSvc(){document.getElementById('lpSvcModal').classList.remove('on');}
+function saveLPSvc(){
+  const name=document.getElementById('lpSvcName').value||'신규 서비스';
+  const group=document.getElementById('lpSvcGroup').value;
+  const models=[...document.querySelectorAll('#lpSvcModels .chip.sel')].map(c=>c.textContent).join(' · ')||'-';
+  const rpm=document.getElementById('lpSvcRpm').value, tpm=Number(document.getElementById('lpSvcTpm').value).toLocaleString();
+  const budget=document.getElementById('lpSvcBudget').value;
+  const rules=[...document.querySelectorAll('#lpSvcRules .ck.sel')].map(c=>c.textContent.replace('✓','').trim()).join(' + ')||'-';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${name}</td><td>${group}</td><td>${models}</td><td>${rpm} / ${tpm}</td><td>${budget}</td><td>${rules}</td><td><span class="pill p-warn">배포 대기</span></td>`;
+  document.getElementById('lpSvcTable').appendChild(tr);
+  closeLPSvc();
+}
+document.getElementById('lpSvcModal').addEventListener('click',e=>{if(e.target.id==='lpSvcModal')closeLPSvc();});
+</script>
+</body>
+</html>
